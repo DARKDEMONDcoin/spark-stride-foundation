@@ -7,6 +7,7 @@ import { ArrowLeft, Check, CheckCircle2, Clock3, Coins, Copy, Crown, DollarSign,
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/app/AppShell";
+import { LuxStage } from "@/components/app/LuxStage";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -47,14 +48,14 @@ function money(cents: number) {
   return new Intl.NumberFormat("ar", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(cents / 100);
 }
 
-function WealthOrbit() {
-  const coins = ["$", "٪", "+", "$", "↑", "٪"];
-  return <div className="relative mx-auto aspect-square w-full max-w-72" aria-hidden="true">
-    <motion.div className="absolute inset-[12%] rounded-full border border-gold/25" animate={{ rotate: 360 }} transition={{ duration: 28, repeat: Infinity, ease: "linear" }}>
-      {coins.map((coin, index) => <motion.span key={`${coin}-${index}`} className="absolute grid size-10 place-items-center rounded-full border border-gold/30 bg-gold-soft font-display text-lg font-black text-gold-deep shadow-card first:left-1/2 first:top-0 first:-translate-x-1/2 [&:nth-child(2)]:right-0 [&:nth-child(2)]:top-1/3 [&:nth-child(3)]:bottom-0 [&:nth-child(3)]:right-1/4 [&:nth-child(4)]:bottom-3 [&:nth-child(4)]:left-2 [&:nth-child(5)]:left-0 [&:nth-child(5)]:top-1/3 [&:nth-child(6)]:right-4 [&:nth-child(6)]:top-3" animate={{ rotate: -360 }} transition={{ duration: 28, repeat: Infinity, ease: "linear" }}>{coin}</motion.span>)}
-    </motion.div>
-    <motion.div className="absolute inset-[29%] grid place-items-center rounded-full border border-primary-foreground/15 bg-card text-foreground shadow-lift" animate={{ y: [0, -7, 0] }} transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}><div className="text-center"><Crown className="mx-auto size-8 text-gold" /><strong className="mt-1 block font-display text-4xl font-black">٥٠٪</strong><span className="text-[0.65rem] font-black text-muted-foreground">أعلى عمولة</span></div></motion.div>
-  </div>;
+function PartnerCard({ rate, level, code }: { rate: number; level: string; code: string }) {
+  return <motion.div initial={{ opacity: 0, rotateX: 18, y: 16 }} animate={{ opacity: 1, rotateX: 0, y: [0, -6, 0] }} transition={{ opacity: { duration: .6 }, rotateX: { duration: .8 }, y: { duration: 5, repeat: Infinity, ease: "easeInOut" } }} className="lux-card" style={{ perspective: 800 }} aria-label={`بطاقة شريك سهل، مستوى ${level}، عمولة ${rate}٪`}>
+    <div className="relative z-10 flex h-full flex-col justify-between">
+      <div className="flex items-start justify-between"><div><p className="text-[0.62rem] font-black tracking-widest text-gold">SAHL PARTNER</p><p className="mt-1 font-display text-sm font-black">نادي الشركاء</p></div><Crown className="size-6 text-gold" aria-hidden="true" /></div>
+      <div className="flex items-end justify-between gap-3"><div className="lux-chip" aria-hidden="true" /><div className="text-left"><strong className="lux-gold-text block font-display text-5xl font-black leading-none">{rate.toLocaleString("ar")}٪</strong><span className="text-[0.65rem] font-bold text-gold-soft/70">عمولتك الحالية</span></div></div>
+      <div className="flex items-end justify-between text-[0.68rem]"><div><p className="text-gold-soft/55">المستوى</p><p className="font-black">{level}</p></div><code dir="ltr" className="font-black tracking-[0.25em] text-gold">{code.toUpperCase()}</code></div>
+    </div>
+  </motion.div>;
 }
 
 function ReferralPage() {
@@ -97,22 +98,22 @@ function ReferralPage() {
 
   async function shareLink() {
     if (!referralUrl) return;
-    if (navigator.share) await navigator.share({ title: "جرّب سهل", text: "هذا ترشيحي لك لتجربة سهل وفريقه الذكي.", url: referralUrl });
+    if (navigator.share) await navigator.share({ title: "جرّب سهل", text: "ترشيحي لك لتجربة سهل وفريقه الذكي. (رابط إحالة: قد أحصل على عمولة إذا اشتركت)", url: referralUrl });
     else await copyLink();
   }
 
   return <AppShell title="شارك واربح" lead="حوّل توصيتك إلى دخل واضح ومستمر">
     {query.isLoading ? <div className="grid min-h-[50vh] place-items-center"><Loader2 className="size-7 animate-spin text-primary" /></div> : query.isError || !dashboard ? <div className="border-t border-border py-12"><h2 className="font-display text-xl font-black">تعذّر تحميل لوحة الإحالة</h2><Button className="mt-5" onClick={() => void query.refetch()}>حاول مرة أخرى</Button></div> : <div className="space-y-8 pb-12">
-      <section className="relative overflow-hidden rounded-lg bg-ink px-5 py-8 text-primary-foreground sm:px-9 sm:py-10">
-        <motion.div className="absolute inset-x-0 bottom-0 h-px bg-gold" animate={{ scaleX: [0.15, 1, 0.15], opacity: [0.3, 1, 0.3] }} transition={{ duration: 5, repeat: Infinity }} aria-hidden="true" />
-        <div className="relative z-10 grid gap-6 lg:grid-cols-[1fr_18rem] lg:items-center">
+      <section className="relative isolate overflow-hidden rounded-2xl border border-gold/20 bg-ink px-5 py-9 text-primary-foreground sm:px-9 sm:py-12">
+        <LuxStage variant="radar" />
+        <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-center">
           <div>
             <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 text-sm font-black text-gold"><Sparkles className="size-4" /> نادي شركاء سهل</motion.p>
             <motion.h2 initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .08 }} className="mt-3 max-w-3xl font-display text-3xl font-black leading-tight sm:text-5xl">كل ترشيح صادق يمكن أن يبني لك دخلاً يتكرر.</motion.h2>
             <p className="mt-4 max-w-xl text-sm leading-7 text-primary-foreground/70">شارك سهل مع أصحاب الأعمال الذين تثق بهم، واربح من مدفوعاتهم المؤكدة بنسبة تبدأ من ٢٠٪ وتصل إلى ٥٠٪.</p>
-            <div className="mt-6 flex flex-wrap gap-2 text-xs font-black"><span className="rounded-full border border-primary-foreground/15 px-3 py-1.5"><Zap className="me-1 inline size-3.5 text-gold" /> تتبع لحظي</span><span className="rounded-full border border-primary-foreground/15 px-3 py-1.5"><CheckCircle2 className="me-1 inline size-3.5 text-jade" /> مدفوعات موثقة</span><span className="rounded-full border border-primary-foreground/15 px-3 py-1.5"><Scale className="me-1 inline size-3.5 text-gold" /> شروط شفافة</span></div>
+            <div className="mt-6 flex flex-wrap gap-2 text-xs font-black"><span className="rounded-full border border-gold/25 bg-primary-foreground/5 px-3 py-1.5 backdrop-blur"><Zap className="me-1 inline size-3.5 text-gold" /> تتبع لحظي</span><span className="rounded-full border border-gold/25 bg-primary-foreground/5 px-3 py-1.5 backdrop-blur"><CheckCircle2 className="me-1 inline size-3.5 text-jade" /> مدفوعات موثقة</span><span className="rounded-full border border-gold/25 bg-primary-foreground/5 px-3 py-1.5 backdrop-blur"><Scale className="me-1 inline size-3.5 text-gold" /> شروط شفافة</span></div>
           </div>
-          <WealthOrbit />
+          <PartnerCard rate={dashboard.rate} level={currentLevel.name} code={dashboard.code} />
         </div>
       </section>
 
@@ -129,6 +130,7 @@ function ReferralPage() {
           <Button variant="outline" className="h-12 font-black" onClick={copyLink}><Copy /> نسخ</Button>
           <Button className="h-12 font-black" onClick={() => void shareLink()}><Share2 /> مشاركة الرابط</Button>
         </div>
+        <p className="mt-3 flex items-start gap-2 text-xs leading-6 text-muted-foreground"><Scale className="mt-1 size-3.5 shrink-0 text-gold-deep" /> عند المشاركة أفصح بوضوح أنه رابط إحالة وقد تحصل على عمولة، ولا تَعِد بدخل أو نتائج مضمونة. مشاركتك تعني موافقتك على <Link to="/referral-terms" className="font-bold text-foreground underline underline-offset-4">شروط برنامج الإحالة</Link>.</p>
       </section>
 
       <section className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border lg:grid-cols-4" aria-label="ملخص الإحالات">

@@ -47622,3 +47622,70 @@ body:has(.welcome-stage) .sahl-cookie-consent { display: none; }
 body:has(.chat-composer-dock) .liquid-glass-sahl.sahl-cookie-consent {
   bottom: max(11rem, calc(10rem + env(safe-area-inset-bottom)));
 }
+
+/* LuxStage — خلفية ذهبية حيّة لأبطال صفحات التطبيق الداكنة (الإحالة، الملاحظات، الدعم). */
+.lux-stage { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.lux-stage > span { position: absolute; }
+.lux-glow { inset: 0; background:
+  radial-gradient(circle at 85% 0%, color-mix(in oklab, var(--gold) 26%, transparent), transparent 45%),
+  radial-gradient(circle at 8% 100%, color-mix(in oklab, var(--gold-deep) 22%, transparent), transparent 48%); }
+.lux-grid { inset: 0; opacity: .14; background-image:
+  linear-gradient(color-mix(in oklab, var(--gold) 40%, transparent) 1px, transparent 1px),
+  linear-gradient(90deg, color-mix(in oklab, var(--gold) 40%, transparent) 1px, transparent 1px);
+  background-size: 44px 44px; mask-image: radial-gradient(ellipse at 70% 30%, #000 10%, transparent 70%); }
+.lux-radar { top: -45%; inset-inline-start: -20%; width: min(760px, 130%); aspect-ratio: 1; opacity: .55; }
+.lux-radar i { position: absolute; inset: 0; margin: auto; border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--gold) 40%, transparent); animation: lux-pulse 7s ease-out infinite; }
+.lux-radar i:nth-child(2) { width: 34%; height: 34%; }
+.lux-radar i:nth-child(3) { width: 60%; height: 60%; animation-delay: -2.3s; }
+.lux-radar i:nth-child(4) { width: 86%; height: 86%; animation-delay: -4.6s; }
+.lux-radar b { position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0deg, color-mix(in oklab, var(--gold) 30%, transparent) 24deg, transparent 60deg);
+  animation: lux-spin 14s linear infinite; }
+.lux-ledger { inset: 0; opacity: .5; }
+.lux-ledger i { position: absolute; inset-inline: 5%; height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--gold) 70%, transparent), transparent);
+  transform-origin: right; animation: lux-ledger 6s ease-in-out infinite; }
+.lux-ledger i:nth-child(1) { top: 18%; } .lux-ledger i:nth-child(2) { top: 36%; animation-delay: -1.2s; }
+.lux-ledger i:nth-child(3) { top: 54%; animation-delay: -2.4s; } .lux-ledger i:nth-child(4) { top: 72%; animation-delay: -3.6s; }
+.lux-ledger i:nth-child(5) { top: 88%; animation-delay: -4.8s; }
+.lux-sparks { inset: 0; }
+.lux-sparks i { position: absolute; bottom: -10px; width: 3px; height: 3px; border-radius: 50%;
+  background: var(--gold); box-shadow: 0 0 10px 2px color-mix(in oklab, var(--gold) 60%, transparent);
+  animation: lux-rise 9s linear infinite; opacity: 0; }
+.lux-sparks i:nth-child(1){left:6%;animation-delay:0s}.lux-sparks i:nth-child(2){left:14%;animation-delay:-3s;animation-duration:11s}
+.lux-sparks i:nth-child(3){left:22%;animation-delay:-6s}.lux-sparks i:nth-child(4){left:31%;animation-delay:-1.5s;animation-duration:12s}
+.lux-sparks i:nth-child(5){left:39%;animation-delay:-7.5s}.lux-sparks i:nth-child(6){left:47%;animation-delay:-4s;animation-duration:10s}
+.lux-sparks i:nth-child(7){left:55%;animation-delay:-8s}.lux-sparks i:nth-child(8){left:63%;animation-delay:-2s;animation-duration:13s}
+.lux-sparks i:nth-child(9){left:70%;animation-delay:-5s}.lux-sparks i:nth-child(10){left:77%;animation-delay:-9s;animation-duration:11s}
+.lux-sparks i:nth-child(11){left:84%;animation-delay:-2.5s}.lux-sparks i:nth-child(12){left:90%;animation-delay:-6.5s;animation-duration:12s}
+.lux-sparks i:nth-child(13){left:95%;animation-delay:-4.5s}.lux-sparks i:nth-child(14){left:3%;animation-delay:-8.5s;animation-duration:10s}
+.lux-sheen { inset: 0; background: linear-gradient(105deg, transparent 35%, color-mix(in oklab, var(--gold) 14%, transparent) 50%, transparent 65%);
+  background-size: 250% 100%; animation: lux-sheen 7s ease-in-out infinite; }
+.lux-baseline { inset-inline: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  animation: lux-base 5s ease-in-out infinite; }
+@keyframes lux-spin { to { transform: rotate(360deg); } }
+@keyframes lux-pulse { 0% { transform: scale(.86); opacity: .15; } 45% { opacity: .6; } 100% { transform: scale(1.08); opacity: 0; } }
+@keyframes lux-ledger { 0%,100% { transform: scaleX(.2); opacity: .2; } 50% { transform: scaleX(1); opacity: 1; } }
+@keyframes lux-rise { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .9; } 100% { transform: translateY(-420px); opacity: 0; } }
+@keyframes lux-sheen { 0%,100% { background-position: 120% 0; } 50% { background-position: -20% 0; } }
+@keyframes lux-base { 0%,100% { transform: scaleX(.2); opacity: .35; } 50% { transform: scaleX(1); opacity: 1; } }
+
+/* بطاقة الشريك الذهبية */
+.lux-card { position: relative; overflow: hidden; border-radius: 1.1rem; aspect-ratio: 1.586; width: 100%; max-width: 22rem;
+  margin-inline: auto; padding: 1.25rem 1.4rem; color: var(--gold-soft);
+  background: linear-gradient(135deg, oklch(0.24 0.01 60), oklch(0.13 0.004 60) 55%, oklch(0.2 0.02 70));
+  border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
+  box-shadow: 0 30px 60px -25px color-mix(in oklab, var(--gold) 45%, transparent), inset 0 1px 0 color-mix(in oklab, var(--gold) 35%, transparent); }
+.lux-card::before { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 30%, color-mix(in oklab, var(--gold) 30%, transparent) 48%, transparent 60%);
+  background-size: 260% 100%; animation: lux-sheen 5.5s ease-in-out infinite; }
+.lux-card::after { content: ""; position: absolute; width: 14rem; aspect-ratio: 1; inset-inline-end: -5rem; bottom: -7rem; border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--gold) 30%, transparent); box-shadow: 0 0 0 1.6rem color-mix(in oklab, var(--gold) 6%, transparent); }
+.lux-chip { width: 2.6rem; height: 2rem; border-radius: .4rem;
+  background: linear-gradient(135deg, var(--gold-soft), var(--gold) 50%, var(--gold-deep)); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ink) 25%, transparent); }
+.lux-gold-text { background: linear-gradient(100deg, var(--gold-soft), var(--gold) 45%, var(--gold-soft) 70%, var(--gold));
+  background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: lux-sheen 6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .lux-stage *, .lux-stage, .lux-card::before, .lux-gold-text { animation: none !important; }
+}
