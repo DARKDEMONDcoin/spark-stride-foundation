@@ -473,7 +473,7 @@ export async function runEmployeeTurn(
         ? ""
         : buildBrandContext(
             workspace,
-             [...(brain ?? []).filter((item) => item.kind !== "employee_guideline" || item.used_by.includes(data.employeeId)), ...durableMemoryItems(durable ?? [])],
+             [...(brain ?? []).filter((item) => item.kind !== "employee_guideline"), ...durableMemoryItems(durable ?? [])],
             data.message,
             10,
           ),

@@ -30,7 +30,7 @@
 - Public website color swatches come only from the scanned site's declared theme and same-site stylesheet brand tokens, never generic CSS color frequency or invented defaults. Why: the introduction must not misrepresent the visitor's branding.
 - Public pre-signup industry recommendations are short, rate-limited, validated AI suggestions grounded in a selected sector and optional public-site evidence; no account data or market metrics are implied. Why: visitors get useful next actions without confusing hypotheses with verified findings.
 - Welcome purpose variants live in a browser-safe shared module used by every tour/recommendation path, avoiding business-only claims.
-- The chat toolbelt derives capabilities from shared skill definitions so requests match each employee's skills.
+- Chat capabilities and owner guidelines derive from shared skills; guideline rows are scoped to one employee.
 - Each workspace has exactly one persistent conversation per employee across web and Telegram; this keeps history and unread state WhatsApp-like.
 - Website context is controlled by one workspace-level switch that every employee execution path must honor.
 - Chat voice dictation records in the browser and streams transcription through the authenticated `/api/transcribe` route into the draft (never auto-sends). Why: users review spoken text before it reaches an employee.
