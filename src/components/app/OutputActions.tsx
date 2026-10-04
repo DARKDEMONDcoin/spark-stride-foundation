@@ -42,7 +42,7 @@ export function detectOutputKind(employeeId: string, body: string, imageUrl: str
 function linksFor(kind: OutputKind): QuickLink[] {
   switch (kind) {
     case "design": return [];
-    case "post": return [{ to: "/app/calendar", label: "جدوله", icon: CalendarDays }, { to: "/app/queue", label: "طابور النشر", icon: Send }];
+    case "post": return [{ to: "/app/calendar", label: "جدوله", icon: CalendarDays }];
     case "email": return [{ to: "/app/inbox-watch", label: "راجع البريد والإرسال", icon: Send }];
     case "event": return [{ to: "/app/tasks", label: "المهام والمواعيد", icon: CalendarDays }];
     case "article": return [{ to: "/app/reports", label: "أداء المحتوى", icon: LineChart }];

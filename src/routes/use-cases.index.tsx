@@ -61,31 +61,13 @@ function UseCasesPage() {
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{u.short}</p>
                 <AppRow apps={u.apps.slice(0, 5)} className="mt-5" />
                 <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-primary">
-                  شاهد خطة القطاع
+                  اعرف كيف يعمل الفريق
                   <ArrowLeft className="size-4 transition-transform duration-300 group-hover:-translate-x-1" />
                 </span>
               </Link>
             </Reveal>
           ))}
         </div>
-      </section>
-
-      <section className="px-5 py-16">
-        <Reveal>
-          <div className="mx-auto max-w-3xl rounded-[1.75rem] border border-border bg-secondary/50 p-8 text-center">
-            <h2 className="font-display text-2xl font-black">نشاطك ليس في القائمة؟</h2>
-            <p className="mt-3 leading-relaxed text-muted-foreground">
-              الفريق يتعلّم مجالك من موقعك ومنافسيك ونصوصك خلال أول جلسة إعداد. أخبرنا بمجالك وسنبني
-              لك خطة الأسبوع الأولى قبل أن تدفع شيئاً.
-            </p>
-            <Link
-              to="/contact"
-              className="mt-6 inline-flex rounded-full bg-foreground px-7 py-3.5 font-bold text-background"
-            >
-              اطلب خطة مجالك
-            </Link>
-          </div>
-        </Reveal>
       </section>
 
       <CtaBand />

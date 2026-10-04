@@ -58,7 +58,7 @@ function UseCasePage() {
             to="/welcome" search={{ plan: "growth" as const }}
             className="rounded-full bg-white px-7 py-3.5 font-bold text-ink"
           >
-            ابدأ بخطة {u.name}
+            ابدأ تجربتك المجانية
           </Link>
           <Link
             to="/employees"

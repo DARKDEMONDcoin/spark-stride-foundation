@@ -176,20 +176,20 @@ const sectors = [
   },
 ] as const;
 
-/** أرقام حقيقية محسوبة من داخل المنصة نفسها — قابلة للتحقق داخل حسابك. */
+/** وعود تشغيلية يراها المستخدم داخل المنتج، وليست أرقاماً تسويقية مجردة. */
 const stats = [
-  { value: "١٠٨", label: "قدرة جاهزة داخل المنصة", tone: "terracotta" },
-  { value: "٤٠", label: "تكاملاً رسميًا مع أدواتك", tone: "gold" },
-  { value: "٦", label: "موظفين يعملون بسياق واحد", tone: "teal" },
-  { value: "٥", label: "لهجات عربية يكتب بها الفريق", tone: "fusion" },
+  { value: "ينفّذ", label: "داخل الأدوات التي تستخدمها", tone: "terracotta" },
+  { value: "يتذكّر", label: "سياق مشروعك وقراراتك", tone: "gold" },
+  { value: "يستأذن", label: "قبل النشر والإرسال والدفع", tone: "teal" },
+  { value: "يتعاون", label: "ويسلّم كل نتيجة للدور التالي", tone: "fusion" },
 ];
 
 /** إثباتات قابلة للتحقق داخل الحساب — لا ادعاءات عملاء. */
 const proofs = [
   {
     kicker: "تحقق بنفسك",
-    title: "١٠٨ قدرة تُشغَّل بضغطة",
-    body: "افتح محادثة أي موظف واضغط «القدرات»: كل قدرة لها نموذج إدخال ومخرج جاهز للاعتماد، من خطة ٣٠ يومًا إلى فحص سيو فوري.",
+    title: "القدرة تبدأ من طلبك، لا من قائمة أزرار",
+    body: "اكتب المطلوب كما تكلّم موظفاً؛ يختار سهل المهارة والأداة المناسبة، ثم يعرض النتيجة والإجراء التالي داخل المحادثة نفسها.",
   },
   {
     kicker: "بيانات حقيقية",
@@ -638,18 +638,18 @@ export function EditorialHomepage() {
           <Reveal className="sahl-hero-copy">
             <div
               className="sahl-live-metric"
-              aria-label="١٠٨ قدرة جاهزة، ٤٠ تكاملاً، ٦ موظفين بالعربية"
+              aria-label="فريق ينفذ داخل أدواتك، يتذكر سياقك، ويطلب موافقتك قبل الإجراءات الحساسة"
             >
               <span>
-                <b>١٠٨</b> قدرة جاهزة
+                <b>ينفّذ</b> داخل أدواتك
               </span>
               <i aria-hidden="true">•</i>
               <span>
-                <b>٤٠</b> تكاملاً
+                <b>يتذكّر</b> سياقك
               </span>
               <i aria-hidden="true">•</i>
               <span>
-                <b>٦</b> موظفين بالعربية
+                <b>يستأذن</b> قبل الإجراء
               </span>
             </div>
             <h1 id="home-title">
@@ -657,7 +657,6 @@ export function EditorialHomepage() {
               <br />
               يتعمل <em>قبل ما تخلص قهوتك.</em>
             </h1>
-            <p className="sahl-first-claim">أول منصة ذكاء اصطناعي عربية.</p>
             <p className="sahl-lead">يكتبولك، يصمملك، يبيعولك، وانت بس بتشوف النتيجة بتكبر.</p>
             <div className="sahl-actions">
               <Button asChild size="lg">
@@ -698,6 +697,7 @@ export function EditorialHomepage() {
 
       <section className="sahl-trust" aria-label="مزايا تشغيل فريق سهل">
         <div className="sahl-shell">
+          <strong className="sahl-arabic-first">أول منصة عربية تجمع فريق ذكاء اصطناعي ينفّذ العمل داخل أدواتك</strong>
           <p>
             <b>مصمم للعمل العربي</b> من أول طلب حتى آخر قرار
           </p>
@@ -818,13 +818,11 @@ export function EditorialHomepage() {
                     شاهد مهامه <ArrowLeft />
                   </Link>
                 </div>
-                {item.span === "wide" ? (
-                  <ProductFrame
-                    src={item.image}
-                    mobileSrc={item.mobileImage}
-                    alt={`واجهة ${item.kicker} داخل سهل`}
-                  />
-                ) : null}
+                <ProductFrame
+                  src={item.image}
+                  mobileSrc={item.mobileImage}
+                  alt={`واجهة ${item.kicker} داخل سهل`}
+                />
               </Reveal>
             ))}
           </div>
@@ -856,10 +854,10 @@ export function EditorialHomepage() {
         <div className="sahl-shell">
           <Reveal>
             <header>
-              <span>أرقام من داخل المنصة</span>
+              <span>طريقة عمل مختلفة</span>
               <h2>
-                <strong>ما تحصل عليه فعليًا</strong>
-                <em> من أول يوم في حسابك.</em>
+                <strong>فريق لا يكتفي بالإجابة.</strong>
+                <em> يتابع العمل حتى قرارك.</em>
               </h2>
             </header>
           </Reveal>

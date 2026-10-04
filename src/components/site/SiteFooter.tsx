@@ -31,6 +31,7 @@ const cols: { t: string; l: { label: string; to: string }[] }[] = [
       { label: "المدونة", to: "/blog" },
       { label: "الأسئلة الشائعة", to: "/faq" },
       { label: "تواصل معنا", to: "/contact" },
+      { label: "مركز المساعدة", to: "/app/help" },
     ],
   },
   {
@@ -65,6 +66,9 @@ export function SiteFooter() {
                 فريق موظفين بالذكاء الاصطناعي، يعمل بالعربية على مدار الساعة لأصحاب المشاريع — ينشر،
                 يصمّم، يردّ، ويبيع نيابة عنك.
               </p>
+              <Link to="/welcome" className="site-footer-link mt-4 inline-flex font-black text-primary">
+                ابدأ تجربتك المجانية
+              </Link>
             </div>
             {cols.map((c) => (
               <nav key={c.t} aria-label={c.t} className="site-footer-desktop-col">

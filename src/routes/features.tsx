@@ -22,7 +22,7 @@ export const Route = createFileRoute("/features")({
       {
         name: "description",
         content:
-          "لهجة محلية حقيقية، صور بنص عربي سليم، ربط آمن مع 25 تطبيقاً، موافقات قبل التنفيذ، وتقارير تقول لك ماذا تفعل بعدها.",
+          "لهجة محلية حقيقية، صور بنص عربي سليم، ربط آمن مع 40 تطبيقاً، موافقات قبل التنفيذ، وتقارير تقول لك ماذا تفعل بعدها.",
       },
       { property: "og:title", content: "مزايا منصة سهل" },
       {
@@ -172,7 +172,7 @@ function FeaturesPage() {
       <section className="mx-auto max-w-6xl px-5 pb-16">
         <Reveal>
           <div className="rounded-3xl border border-border bg-card p-8 text-center shadow-card">
-            <h2 className="font-display text-2xl font-black">يتصل بـ 25 تطبيقاً تستخدمه فعلاً</h2>
+            <h2 className="font-display text-2xl font-black">يتصل بـ 40 تطبيقاً تستخدمه فعلاً</h2>
             <p className="mt-3 text-muted-foreground">
               ربط بضغطتين، صلاحيات أدنى افتراضياً، وإلغاء في أي لحظة.
             </p>

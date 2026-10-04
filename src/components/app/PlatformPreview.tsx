@@ -396,7 +396,7 @@ export function PlatformPreviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[94dvh] w-[calc(100vw-1rem)] max-w-xl grid-cols-[minmax(0,1fr)] gap-0 overflow-hidden p-0">
+      <DialogContent className="inset-x-0 bottom-0 top-auto max-h-[96dvh] w-full max-w-none translate-x-0 translate-y-0 grid-cols-[minmax(0,1fr)] gap-0 overflow-hidden rounded-b-none p-0 sm:inset-x-1/2 sm:bottom-auto sm:top-1/2 sm:w-[min(94vw,58rem)] sm:max-w-[58rem] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg">
         <div className="border-b border-border p-4 pr-12">
           <DialogTitle className="font-display text-base font-black">معاينة على المنصة</DialogTitle>
           <DialogDescription className="text-xs">
@@ -434,11 +434,11 @@ export function PlatformPreviewDialog({
             </div>
           </div>
         </div>
-        <div className="max-h-[calc(94dvh-11rem)] min-w-0 overflow-y-auto overflow-x-hidden bg-secondary/60 p-2 sm:p-4">
+        <div className="max-h-[calc(96dvh-11rem)] min-w-0 overflow-y-auto overflow-x-auto bg-secondary/60 p-2 sm:p-5">
           <div
             className={cn(
               "mx-auto w-full overflow-hidden border border-border shadow-lift transition-all",
-              device === "mobile" ? "max-w-[22rem] rounded-[1.75rem]" : "max-w-[34rem] rounded-xl",
+              device === "mobile" ? "max-w-[22rem] rounded-[1.75rem]" : "max-w-[52rem] rounded-xl",
             )}
           >
             {kind === "instagram" ? <Instagram {...props} /> : null}

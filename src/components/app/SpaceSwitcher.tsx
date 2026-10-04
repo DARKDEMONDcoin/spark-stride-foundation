@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Archive, ArchiveRestore, Check, ChevronsUpDown, Crown, ImagePlus, Loader2, Pencil, Plus, User, Users, X } from "lucide-react";
+import { Archive, ArchiveRestore, Check, ChevronsUpDown, Crown, ImagePlus, Loader2, Pencil, Plus, Users, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -21,11 +21,12 @@ type Space = { id: string; name: string; kind: string; owned: boolean; logo: str
 
 function SpaceIcon({ space, className }: { space?: Pick<Space, "name" | "logo" | "kind"> | null | undefined; className?: string }) {
   const { region } = useRegion();
+  if (space?.kind === "personal") return null;
   const src = space?.logo ?? (space?.kind === "project" ? spaceCoverOf(region) : null);
   if (src) return <img src={src} alt="" loading="lazy" className={cn("size-9 shrink-0 rounded-lg border border-border object-cover", className)} />;
   return (
     <span className={cn("grid size-9 shrink-0 place-items-center rounded-lg border border-border bg-primary/10 font-display text-sm font-black text-primary", className)}>
-      {space?.kind === "personal" ? <User className="size-4" /> : (space?.name ?? "؟").slice(0, 2)}
+      {(space?.name ?? "؟").slice(0, 2)}
     </span>
   );
 }
@@ -58,7 +59,7 @@ export function SpaceSwitcher({ collapsed = false }: { collapsed?: boolean }) {
         <PopoverTrigger asChild>
           <button type="button" aria-label="تبديل المساحة" title={collapsed ? current?.name : undefined}
             className={cn("flex w-full items-center gap-2.5 rounded-lg border border-border bg-card p-2 text-start transition hover:bg-accent", collapsed && "justify-center p-1")}>
-            <SpaceIcon space={current} />
+            {current?.kind !== "personal" ? <SpaceIcon space={current} /> : null}
             {!collapsed && (
               <>
                 <span className="min-w-0 flex-1">
@@ -76,11 +77,11 @@ export function SpaceSwitcher({ collapsed = false }: { collapsed?: boolean }) {
             {list.map((s) => (
               <button key={s.id} type="button" onClick={() => switchTo(s.id)}
                 className={cn("flex w-full items-center gap-2.5 rounded-md p-2 text-start text-sm hover:bg-accent", s.id === current?.id && "bg-accent")}>
-                <SpaceIcon space={s} className="size-8" />
+                {s.kind !== "personal" ? <SpaceIcon space={s} className="size-8" /> : null}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-bold">{s.name}</span>
                   <span className="flex items-center gap-1 text-[0.7rem] text-muted-foreground">
-                    {s.kind === "personal" ? <><User className="size-3" /> شخصية</> : <><Users className="size-3" /> {s.owned ? "مشروعي" : "مشروع فريق"}</>}
+                    {s.kind === "personal" ? "مساحة العمل الشخصية" : <><Users className="size-3" /> {s.owned ? "مشروعي" : "مشروع فريق"}</>}
                   </span>
                 </span>
                 {s.id === current?.id && <Check className="size-4 text-primary" />}
