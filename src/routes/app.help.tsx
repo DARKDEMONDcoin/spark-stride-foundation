@@ -35,12 +35,25 @@ function HelpPage() {
   const [reference, setReference] = useState("");
   const [error, setError] = useState("");
   const faqs = [
-    { q: "كيف أبدأ محادثة جديدة مع موظف؟", a: "اختر الموظف من قائمة المحادثات واكتب طلبك مباشرة. لكل موظف محادثة مستمرة تحفظ سياق عمله معك." },
+    { q: "كيف أبدأ محادثة جديدة مع موظف؟", a: "اختر الموظف من قائمة المحادثات واكتب النتيجة التي تريدها مباشرة. لكل موظف محادثة مستمرة تحفظ سياق عمله معك." },
+    { q: "أي موظف أختار؟", a: "سِراج للتسويق، دانة للتصميم، نور للمحتوى والسيو، سالم للمبيعات، أمَل للتنظيم والبريد والمواعيد، وآدم للتقارير والتحليل. وإذا بدأ الطلب مع موظف آخر ينتقل التخصص داخلياً دون أن تفقد المحادثة." },
     { q: "لماذا يحتاج التنفيذ إلى موافقتي؟", a: "الأفعال الحساسة مثل النشر والإرسال والدفع تتوقف قبل التنفيذ حتى تراجعها. هذا هو الوضع الآمن الافتراضي." },
+    { q: "أين أجد العناصر التي تنتظر موافقتي؟", a: "افتح «الموافقات» من التنقل الرئيسي. سترى الإجراء، الحساب المستهدف، وما الذي سيحدث قبل أن تعتمد أو ترفض." },
     { q: "كيف يعمل الفريق داخل مشروع مشترك؟", a: "اختر المشروع من مبدّل المساحات. يرى الأعضاء المصرح لهم محادثات الموظفين والمهام والموافقات داخل ذلك المشروع فقط." },
+    { q: "كيف أدعو عضواً وأغيّر صلاحياته؟", a: "من مساحة العمل افتح إدارة الفريق، أرسل الدعوة إلى بريده، ثم اختر دوره. لا يحصل العضو إلا على صلاحيات المشروع الذي انضم إليه." },
+    { q: "ما الفرق بين مساحة العمل الشخصية ومساحة المشروع؟", a: "الشخصية خاصة بك. مساحة المشروع تشارك محادثاتها ومهامها وموافقاتها مع أعضاء ذلك المشروع بحسب صلاحياتهم." },
     { q: "أين أربط حساباتي وأدواتي؟", a: "افتح التكاملات من التنقل الرئيسي، ثم اختر الخدمة واتبع خطوات الربط. يمكنك فصل أي خدمة في أي وقت." },
+    { q: "لماذا توقف النشر أو انقطع تكامل؟", a: "قد تنتهي جلسة الخدمة أو تتغير صلاحياتها. افتح التكاملات وأعد الربط، ثم أعد محاولة العنصر الفاشل من التقويم أو قائمة النشر." },
     { q: "كيف أستخدم المتصفح المنفّذ؟", a: "اطلب المهمة من الموظف المناسب داخل محادثته. سيستخدم المتصفح عند الحاجة ويتوقف قبل أي إجراء حساس للموافقة." },
+    { q: "ما الفرق بين تقويم المحتوى وتقويم المشاريع؟", a: "تقويم المحتوى يعرض المنشورات والتصاميم والمقالات والاجتماعات حسب الموظف. تقويم المشروع يعرض مواعيد مهام أعضاء المساحة فقط." },
+    { q: "كيف أغيّر موعد منشور أو مقال؟", a: "على الكمبيوتر اسحب العنصر إلى اليوم الجديد. ويمكنك فتحه على أي شاشة لتعديل التاريخ والوقت؛ المنشور الذي نُشر بالفعل لا يمكن نقله." },
+    { q: "كيف أغيّر التنبيهات والمنطقة الزمنية؟", a: "من الإعدادات افتح «التنبيهات»، اختر الأحداث المهمة ووتيرة الملخص والمنطقة الزمنية، ثم احفظ." },
+    { q: "كيف أعدّل بيانات العلامة ونبرتها؟", a: "من الإعدادات حدّث نشاطك وموقعك ونبرة العلامة والكلمات الممنوعة. يقرأ الموظفون هذه البيانات قبل المهام المناسبة." },
+    { q: "كيف أصدّر بيانات حسابي؟", a: "من الإعدادات ثم الحساب والأمان اختر تنزيل نسخة من بياناتي. لا تشارك الملف لأنه قد يحتوي معلومات خاصة بمساحتك." },
+    { q: "كيف أحمي حسابي؟", a: "استخدم كلمة مرور مختلفة، راجع الحسابات المربوطة دورياً، وسجّل الخروج من كل الأجهزة إذا شككت في جلسة غير معروفة." },
+    { q: "كيف تعمل الباقات والاستخدام؟", a: "يعرض قسم الاستخدام والباقات حالتك الحالية والمهام المكتملة. راجع صفحة الأسعار قبل الترقية؛ لن نعرض وسيلة دفع غير مرتبطة فعلياً." },
     { q: "متى تصبح عمولة الإحالة قابلة للسحب؟", a: "بعد تأكيد دفع العميل وانتهاء فترة المراجعة البالغة ٣٠ يوماً. الحد الأدنى لطلب السحب هو ٥٠ دولاراً." },
+    { q: "كيف أتابع طلب الدعم؟", a: "بعد الإرسال يظهر رقم متابعة فريد. احتفظ به عند مراسلة الدعم؛ ويمكنك فتح طلب جديد إذا كانت المشكلة مختلفة." },
   ];
   const filtered = useMemo(() => faqs.filter((item) => `${item.q} ${item.a}`.toLowerCase().includes(search.trim().toLowerCase())), [search]);
 
@@ -50,15 +63,15 @@ function HelpPage() {
     try {
       const result = await send({ data: { workspaceId: workspace?.id ?? null, subject, priority, message, pagePath: window.location.pathname } });
       setReference(result.reference);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "تعذّر فتح الطلب الآن."); }
+    } catch { setError("تعذّر فتح الطلب الآن. تأكد من اتصالك ثم أعد المحاولة."); }
     finally { setSending(false); }
   }
 
   const paths = [
-    { icon: Bot, title: "الموظفون والمحادثات", text: "الطلبات، الموافقات وسجل العمل" },
-    { icon: Users, title: "المشاريع والفريق", text: "الدعوات، الصلاحيات والعمل المشترك" },
-    { icon: Settings2, title: "الربط والإعدادات", text: "الحسابات الخارجية وملف العلامة" },
-    { icon: CreditCard, title: "الفوترة والإحالة", text: "الباقات، العمولات وطلبات السحب" },
+    { icon: Bot, title: "الموظفون والمحادثات", text: "الطلبات، الموافقات وسجل العمل", to: "/app/chat" },
+    { icon: Users, title: "المشاريع والفريق", text: "الدعوات، الصلاحيات والعمل المشترك", to: "/app/workspace" },
+    { icon: Settings2, title: "الربط والإعدادات", text: "الحسابات الخارجية وملف العلامة", to: "/app/settings" },
+    { icon: CreditCard, title: "الفوترة والإحالة", text: "الباقات، العمولات وطلبات السحب", to: "/app/referral" },
   ];
 
   return <AppShell title="المساعدة والدعم" lead="إجابة سريعة، أو طلب يصل إلى إنسان">
@@ -68,7 +81,7 @@ function HelpPage() {
         <div className="relative z-10 mx-auto max-w-2xl"><span className="inline-flex items-center gap-2 text-sm font-black text-gold"><LifeBuoy className="size-4" /> مركز مساعدة سهل</span><h2 className="mt-3 font-display text-3xl font-black sm:text-5xl">ما الذي تريد <span className="lux-gold-text">حله اليوم؟</span></h2><p className="mt-3 text-sm leading-7 text-primary-foreground/65">ابحث عن إجابة مباشرة، أو افتح طلباً يصل إلى فريقنا مع تفاصيل مساحة عملك.</p><div className="relative mx-auto mt-7 max-w-xl"><Search className="absolute right-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} className="h-14 rounded-md border-primary-foreground/15 bg-card pr-12 text-foreground shadow-lift" placeholder="ابحث: دعوة عضو، نشر، عمولة، تكامل…" /></div></div>
       </section>
 
-      <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{paths.map((path) => <article key={path.title} className="group rounded-lg border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-gold/40 hover:shadow-card"><path.icon className="size-5 text-primary" /><h3 className="mt-4 text-sm font-black">{path.title}</h3><p className="mt-1 text-xs leading-6 text-muted-foreground">{path.text}</p></article>)}</section>
+      <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{paths.map((path) => <Link key={path.title} to={path.to} className="group rounded-lg border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-gold/40 hover:shadow-card"><path.icon className="size-5 text-primary" /><h3 className="mt-4 text-sm font-black">{path.title}</h3><p className="mt-1 text-xs leading-6 text-muted-foreground">{path.text}</p></Link>)}</section>
 
       <section className="mt-9 grid gap-8 lg:grid-cols-[minmax(0,1fr)_25rem]">
         <div><div className="mb-4 flex items-end justify-between gap-4"><div><h2 className="font-display text-2xl font-black">إجابات سريعة</h2><p className="mt-1 text-sm text-muted-foreground">الأكثر سؤالاً داخل مساحة العمل.</p></div><BookOpen className="size-5 text-primary" /></div>
