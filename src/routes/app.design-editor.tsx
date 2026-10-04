@@ -1,438 +1,206 @@
-import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Copy, Download, FileArchive, FileText, ImagePlus, Palette, Plus, Save, Trash2 } from "lucide-react";
-import { toast } from "sonner";
-
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/app/AppShell";
+import { Button } from "@/components/ui/button";
+import { DESIGN_DRAFT_KEY } from "@/components/app/OutputActions";
 import { cn } from "@/lib/utils";
+import { ArrowLeft, ArrowRight, Check, Download, FileArchive, FileText, Image as ImageIcon, Layers3, Plus, Redo2, Save, Trash2, Undo2, Upload } from "lucide-react";
 
 export const Route = createFileRoute("/app/design-editor")({
-  head: () => ({
-    meta: [
-      { title: "محرر تصميم دانة | سهل" },
-      { name: "description", content: "صمّم كاروسيل كامل بنص عربي صحيح وقالب علامتك، وحمّله PNG أو ZIP أو PDF." },
-      { property: "og:title", content: "محرر تصميم دانة | سهل" },
-      { property: "og:description", content: "صمّم كاروسيل كامل بنص عربي صحيح وقالب علامتك، وحمّله PNG أو ZIP أو PDF." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: DesignEditor,
+  head: () => ({ meta: [
+    { title: "محرر التصاميم — سهل" },
+    { name: "description", content: "حرّر تصاميم دانة بصريًا وصدّرها بالمقاس المناسب لكل منصة." },
+    { property: "og:title", content: "محرر التصاميم — سهل" },
+    { property: "og:description", content: "مساحة تحرير احترافية لتصاميمك داخل سهل." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
+  component: DesignEditorPage,
 });
 
-const SIZES = {
-  "مربع 1080×1080": [1080, 1080],
-  "عمودي 1080×1350": [1080, 1350],
-  "ستوري 1080×1920": [1080, 1920],
-  "أفقي 1200×630": [1200, 630],
-} as const;
-type SizeKey = keyof typeof SIZES;
-const FONTS = ["Cairo", "Tajawal", "Almarai"];
-const TEMPLATE_KEY = "sahl-brand-template";
+type FormatKey = "square" | "portrait" | "story" | "landscape";
+type Slide = { id: string; title: string; subtitle: string; cta: string; image: string | null };
+type DraftPayload = { body?: string; request?: string; imageUrl?: string | null };
+type EditorSnapshot = { slides: Slide[]; active: number; format: FormatKey; imageZoom: number; imageX: number; imageY: number; overlay: number; align: "right" | "center" | "left"; palette: string };
 
-type Slide = { id: string; img: HTMLImageElement | null; title: string; sub: string; cta: string };
-type Corner = "none" | "tr" | "tl" | "br" | "bl";
-type Style = {
-  size: SizeKey;
-  font: string;
-  textColor: string;
-  accent: string;
-  bg: string;
-  overlay: number;
-  pos: "top" | "center" | "bottom";
-  titleSize: number;
-  logoUrl: string;
-  logoCorner: Corner;
-  showNumbers: boolean;
+const FORMATS: Record<FormatKey, { label: string; width: number; height: number }> = {
+  square: { label: "منشور مربع", width: 1080, height: 1080 },
+  portrait: { label: "منشور طولي", width: 1080, height: 1350 },
+  story: { label: "قصة", width: 1080, height: 1920 },
+  landscape: { label: "عرضي", width: 1200, height: 628 },
 };
+const PALETTES = [
+  { id: "ink", label: "حبر وذهب", bg: "#171513", accent: "#d6a64b", text: "#fffaf0" },
+  { id: "jade", label: "يشم", bg: "#123c3a", accent: "#e1ad53", text: "#fffdf6" },
+  { id: "paper", label: "ورق", bg: "#f7f4ed", accent: "#9d512d", text: "#191715" },
+  { id: "coral", label: "مرجان", bg: "#8d3f2a", accent: "#f4c76a", text: "#fff9ef" },
+];
 
-const DEFAULT_STYLE: Style = {
-  size: "مربع 1080×1080",
-  font: "Cairo",
-  textColor: "#ffffff",
-  accent: "#0f766e",
-  bg: "#1f2937",
-  overlay: 45,
-  pos: "bottom",
-  titleSize: 96,
-  logoUrl: "",
-  logoCorner: "tl",
-  showNumbers: true,
-};
-
-const newSlide = (p: Partial<Slide> = {}): Slide => ({
-  id: Math.random().toString(36).slice(2),
-  img: null,
-  title: "عنوانك هنا",
-  sub: "سطر داعم قصير",
-  cta: "",
-  ...p,
-});
-
-function drawSlide(c: HTMLCanvasElement, s: Slide, st: Style, logo: HTMLImageElement | null, index: number, total: number) {
-  const [w, h] = SIZES[st.size];
-  c.width = w;
-  c.height = h;
-  const ctx = c.getContext("2d")!;
-  ctx.fillStyle = st.bg;
-  ctx.fillRect(0, 0, w, h);
-  if (s.img) {
-    const k = Math.max(w / s.img.width, h / s.img.height);
-    ctx.drawImage(s.img, (w - s.img.width * k) / 2, (h - s.img.height * k) / 2, s.img.width * k, s.img.height * k);
-    ctx.fillStyle = `rgba(0,0,0,${st.overlay / 100})`;
-    ctx.fillRect(0, 0, w, h);
-  }
-  const story = st.size.startsWith("ستوري");
-  const safeTop = story ? 250 : 64;
-  const safeBottom = story ? 350 : 64;
-  ctx.direction = "rtl";
-  ctx.textAlign = "right";
-  const x = w - 64;
-  const maxW = w - 128;
-  const wrap = (t: string, px: number, weight = 800) => {
-    ctx.font = `${weight} ${px}px ${st.font}`;
-    const lines: string[] = [];
-    let line = "";
-    for (const word of t.split(/\s+/)) {
-      const test = line ? `${line} ${word}` : word;
-      if (ctx.measureText(test).width > maxW && line) {
-        lines.push(line);
-        line = word;
-      } else line = test;
-    }
-    if (line) lines.push(line);
-    return lines;
-  };
-  const tLines = s.title ? wrap(s.title, st.titleSize) : [];
-  const subPx = Math.round(st.titleSize * 0.45);
-  const sLines = s.sub ? wrap(s.sub, subPx, 400) : [];
-  const ctaPx = Math.max(40, Math.round(st.titleSize * 0.42));
-  const block = tLines.length * st.titleSize * 1.5 + sLines.length * subPx * 1.7 + (s.cta ? ctaPx * 2.4 : 0);
-  let y = st.pos === "top" ? safeTop + (logo ? 120 : 0) : st.pos === "center" ? (h - block) / 2 : h - safeBottom - block;
-  ctx.fillStyle = st.textColor;
-  ctx.textBaseline = "top";
-  ctx.font = `800 ${st.titleSize}px ${st.font}`;
-  for (const l of tLines) {
-    ctx.fillText(l, x, y);
-    y += st.titleSize * 1.5;
-  }
-  ctx.font = `400 ${subPx}px ${st.font}`;
-  for (const l of sLines) {
-    ctx.fillText(l, x, y);
-    y += subPx * 1.7;
-  }
-  if (s.cta) {
-    ctx.font = `800 ${ctaPx}px ${st.font}`;
-    const bw = ctx.measureText(s.cta).width + ctaPx * 1.6;
-    const bh = ctaPx * 1.8;
-    ctx.fillStyle = st.accent;
-    ctx.beginPath();
-    ctx.roundRect(x - bw, y + ctaPx * 0.3, bw, bh, bh / 2);
-    ctx.fill();
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(s.cta, x - ctaPx * 0.8, y + ctaPx * 0.3 + (bh - ctaPx) / 2 - ctaPx * 0.1);
-  }
-  if (logo && st.logoCorner !== "none") {
-    const lw = Math.round(w * 0.14);
-    const lh = (logo.height / logo.width) * lw;
-    const m = 48;
-    const lx = st.logoCorner.endsWith("l") ? m : w - m - lw;
-    const ly = st.logoCorner.startsWith("t") ? (story ? 180 : m) : h - (story ? 260 : m) - lh;
-    ctx.drawImage(logo, lx, ly, lw, lh);
-  }
-  if (st.showNumbers && total > 1) {
-    const px = 30;
-    ctx.font = `800 ${px}px ${st.font}`;
-    ctx.textAlign = "left";
-    ctx.fillStyle = st.textColor;
-    ctx.globalAlpha = 0.85;
-    ctx.fillText(`${index + 1}/${total}`, 48, h - (story ? 300 : 48) - px);
-    ctx.globalAlpha = 1;
-    ctx.textAlign = "right";
-  }
+function id() { return Math.random().toString(36).slice(2, 10); }
+function textFromBody(body = "") {
+  const clean = body.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/https?:\/\/\S+/g, "").replace(/[*_#>`~-]/g, "").trim();
+  const lines = clean.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+  return { title: (lines[0] || "فكرتك تستحق أن تُرى").slice(0, 90), subtitle: (lines.slice(1).join(" ") || "تصميم واضح، أنيق، وجاهز للنشر").slice(0, 180) };
+}
+function initialSlide(payload: DraftPayload | null): Slide {
+  const copy = textFromBody(payload?.body);
+  return { id: id(), title: copy.title, subtitle: copy.subtitle, cta: "اكتشف المزيد", image: payload?.imageUrl || null };
 }
 
-function loadImage(src: string, cors = false): Promise<HTMLImageElement> {
-  return new Promise((res, rej) => {
-    const i = new Image();
-    if (cors) i.crossOrigin = "anonymous";
-    i.onload = () => res(i);
-    i.onerror = () => rej(new Error("تعذّر تحميل الصورة"));
-    i.src = src;
-  });
-}
-
-function DesignEditor() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [slides, setSlides] = useState<Slide[]>([newSlide({ cta: "اطلب الآن" })]);
+function DesignEditorPage() {
+  const [slides, setSlides] = useState<Slide[]>([initialSlide(null)]);
   const [active, setActive] = useState(0);
-  const [style, setStyle] = useState<Style>(DEFAULT_STYLE);
-  const [logo, setLogo] = useState<HTMLImageElement | null>(null);
-  const [busy, setBusy] = useState(false);
-  const slide = slides[active] ?? slides[0]!;
-  const set = <K extends keyof Style>(k: K, v: Style[K]) => setStyle((s) => ({ ...s, [k]: v }));
-  const patch = (p: Partial<Slide>) => setSlides((all) => all.map((s, i) => (i === active ? { ...s, ...p } : s)));
+  const [format, setFormat] = useState<FormatKey>("square");
+  const [imageZoom, setImageZoom] = useState(100);
+  const [imageX, setImageX] = useState(50);
+  const [imageY, setImageY] = useState(50);
+  const [overlay, setOverlay] = useState(42);
+  const [align, setAlign] = useState<"right" | "center" | "left">("right");
+  const [palette, setPalette] = useState("ink");
+  const [history, setHistory] = useState<EditorSnapshot[]>([]);
+  const [future, setFuture] = useState<EditorSnapshot[]>([]);
+  const [notice, setNotice] = useState("محفوظ تلقائيًا");
+  const hydrated = useRef(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const slide = slides[active] ?? slides[0];
+  const scheme = PALETTES.find((item) => item.id === palette) ?? PALETTES[0]!;
+  const size = FORMATS[format];
+  const ratio = `${size.width} / ${size.height}`;
+
+  const snapshot = (): EditorSnapshot => ({ slides, active, format, imageZoom, imageX, imageY, overlay, align, palette });
+  const restore = (next: EditorSnapshot) => {
+    setSlides(next.slides); setActive(next.active); setFormat(next.format); setImageZoom(next.imageZoom);
+    setImageX(next.imageX); setImageY(next.imageY); setOverlay(next.overlay); setAlign(next.align); setPalette(next.palette);
+  };
+  const checkpoint = () => { setHistory((items) => [...items.slice(-29), snapshot()]); setFuture([]); };
 
   useEffect(() => {
-    const id = "design-editor-fonts";
-    if (document.getElementById(id)) return;
-    const l = document.createElement("link");
-    l.id = id;
-    l.rel = "stylesheet";
-    l.href = "https://fonts.googleapis.com/css2?family=Cairo:wght@400;800&family=Tajawal:wght@400;800&family=Almarai:wght@400;800&display=swap";
-    document.head.appendChild(l);
+    let payload: DraftPayload | null = null;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const stored = sessionStorage.getItem(DESIGN_DRAFT_KEY);
+      if (params.get("seed") === "chat" && stored) payload = JSON.parse(stored) as DraftPayload;
+      const legacyImage = params.get("img");
+      if (legacyImage) payload = { ...(payload ?? {}), imageUrl: legacyImage };
+      if (!payload) {
+        const saved = localStorage.getItem("sahl:design-editor:autosave");
+        if (saved) { restore(JSON.parse(saved) as EditorSnapshot); hydrated.current = true; return; }
+      }
+    } catch { /* ابدأ بمسودة نظيفة عند منع التخزين أو تلفها. */ }
+    setSlides([initialSlide(payload)]);
+    hydrated.current = true;
   }, []);
 
-  // قالب العلامة المحفوظ يُطبق تلقائياً عند الفتح.
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(TEMPLATE_KEY) ?? "null") as Partial<Style> | null;
-      if (saved) setStyle((s) => ({ ...s, ...saved }));
-    } catch {
-      /* ignore */
+    if (!hydrated.current) return;
+    const timer = window.setTimeout(() => {
+      try { localStorage.setItem("sahl:design-editor:autosave", JSON.stringify(snapshot())); setNotice("محفوظ تلقائيًا"); }
+      catch { setNotice("تعذّر الحفظ المحلي"); }
+    }, 500);
+    setNotice("جارٍ الحفظ…");
+    return () => window.clearTimeout(timer);
+  }, [slides, active, format, imageZoom, imageX, imageY, overlay, align, palette]);
+
+  const updateSlide = (patch: Partial<Slide>) => setSlides((items) => items.map((item, index) => index === active ? { ...item, ...patch } : item));
+  const addSlide = () => { checkpoint(); setSlides((items) => [...items, { ...initialSlide(null), title: `شريحة ${items.length + 1}` }]); setActive(slides.length); };
+  const deleteSlide = () => { if (slides.length === 1) return; checkpoint(); setSlides((items) => items.filter((_, index) => index !== active)); setActive(Math.max(0, active - 1)); };
+  const undo = () => { const previous = history.at(-1); if (!previous) return; setFuture((items) => [snapshot(), ...items]); setHistory((items) => items.slice(0, -1)); restore(previous); };
+  const redo = () => { const next = future[0]; if (!next) return; setHistory((items) => [...items, snapshot()]); setFuture((items) => items.slice(1)); restore(next); };
+
+  const drawSlide = async (item: Slide) => {
+    const canvas = document.createElement("canvas"); canvas.width = size.width; canvas.height = size.height;
+    const ctx = canvas.getContext("2d"); if (!ctx) throw new Error("تعذّر تجهيز ملف الصورة");
+    ctx.fillStyle = scheme.bg; ctx.fillRect(0, 0, size.width, size.height);
+    if (item.image) {
+      const image = new Image(); image.crossOrigin = "anonymous"; image.src = item.image;
+      await image.decode();
+      const baseScale = Math.max(size.width / image.width, size.height / image.height) * imageZoom / 100;
+      const dw = image.width * baseScale, dh = image.height * baseScale;
+      const dx = (size.width - dw) * imageX / 100, dy = (size.height - dh) * imageY / 100;
+      ctx.drawImage(image, dx, dy, dw, dh);
+      ctx.fillStyle = `rgba(0,0,0,${overlay / 100})`; ctx.fillRect(0, 0, size.width, size.height);
     }
-  }, []);
-
-  useEffect(() => {
-    if (!style.logoUrl) return setLogo(null);
-    loadImage(style.logoUrl, !style.logoUrl.startsWith("data:")).then(setLogo).catch(() => setLogo(null));
-  }, [style.logoUrl]);
-
-  useEffect(() => {
-    const c = canvasRef.current;
-    if (!c) return;
-    const draw = () => drawSlide(c, slide, style, logo, active, slides.length);
-    draw();
-    void document.fonts?.load(`800 40px ${style.font}`).then(draw);
-  }, [slide, style, logo, active, slides.length]);
-
-  /** فتح تصميم دانة مباشرة من المحادثة عبر ?img= بدون رفع يدوي. */
-  useEffect(() => {
-    const url = new URLSearchParams(window.location.search).get("img");
-    if (!url || !/^https?:\/\//.test(url)) return;
-    loadImage(url, true).then((i) => setSlides((all) => all.map((s, idx) => (idx === 0 ? { ...s, img: i } : s)))).catch(() => null);
-  }, []);
-
-  const onFile = (f?: File) => {
-    if (!f) return;
-    loadImage(URL.createObjectURL(f)).then((i) => patch({ img: i }));
+    const pad = size.width * 0.075; const center = align === "center";
+    ctx.textAlign = center ? "center" : align === "left" ? "left" : "right";
+    const x = center ? size.width / 2 : align === "left" ? pad : size.width - pad;
+    ctx.direction = "rtl"; ctx.fillStyle = scheme.accent; ctx.font = `700 ${Math.round(size.width * .026)}px sans-serif`;
+    ctx.fillText("سهل × دانة", x, size.height * .14);
+    const wrap = (text: string, maxWidth: number, font: string, y: number, line: number) => {
+      ctx.font = font; const words = text.split(/\s+/); const lines: string[] = []; let current = "";
+      words.forEach((word) => { const test = `${current} ${word}`.trim(); if (ctx.measureText(test).width > maxWidth && current) { lines.push(current); current = word; } else current = test; });
+      if (current) lines.push(current); lines.slice(0, 4).forEach((value, index) => ctx.fillText(value, x, y + index * line)); return lines.length;
+    };
+    ctx.fillStyle = scheme.text; const titleSize = Math.round(size.width * .072); const titleY = size.height * .48;
+    const titleLines = wrap(item.title, size.width * .84, `800 ${titleSize}px sans-serif`, titleY, titleSize * 1.25);
+    ctx.globalAlpha = .86; const subSize = Math.round(size.width * .03);
+    wrap(item.subtitle, size.width * .76, `500 ${subSize}px sans-serif`, titleY + titleLines * titleSize * 1.25 + subSize, subSize * 1.55); ctx.globalAlpha = 1;
+    ctx.fillStyle = scheme.accent; const buttonW = size.width * .3, buttonH = size.width * .07; const bx = center ? x - buttonW / 2 : align === "left" ? x : x - buttonW;
+    ctx.beginPath(); ctx.roundRect(bx, size.height * .82, buttonW, buttonH, buttonH / 2); ctx.fill();
+    ctx.fillStyle = scheme.bg; ctx.textAlign = "center"; ctx.font = `700 ${Math.round(size.width * .026)}px sans-serif`; ctx.fillText(item.cta, bx + buttonW / 2, size.height * .82 + buttonH * .64);
+    return canvas;
   };
-  const onLogo = (f?: File) => {
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = () => set("logoUrl", String(r.result));
-    r.readAsDataURL(f);
-  };
-
-  const renderAll = async (): Promise<HTMLCanvasElement[]> => {
-    await document.fonts?.load(`800 40px ${style.font}`);
-    return slides.map((s, i) => {
-      const c = document.createElement("canvas");
-      drawSlide(c, s, style, logo, i, slides.length);
-      return c;
-    });
-  };
-  const save = (blob: Blob, name: string) => {
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = name;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  };
-  const guard = async (fn: () => Promise<void>) => {
-    setBusy(true);
+  const download = async (kind: "png" | "pdf" | "zip") => {
+    setNotice("جارٍ تجهيز الملف…");
     try {
-      await fn();
-    } catch (e) {
-      toast.error(e instanceof Error && /tainted|insecure/i.test(e.message) ? "إحدى الصور لا تسمح بالتصدير — ارفعها من جهازك." : "تعذّر التصدير الآن.");
-    } finally {
-      setBusy(false);
-    }
+      if (kind === "png") {
+        const canvas = await drawSlide(slide!); const link = document.createElement("a"); link.download = `sahl-design-${active + 1}.png`; link.href = canvas.toDataURL("image/png"); link.click();
+      } else if (kind === "pdf") {
+        const { jsPDF } = await import("jspdf"); const pdf = new jsPDF({ orientation: size.width > size.height ? "landscape" : "portrait", unit: "px", format: [size.width, size.height] });
+        for (let index = 0; index < slides.length; index += 1) { if (index) pdf.addPage([size.width, size.height]); const canvas = await drawSlide(slides[index]!); pdf.addImage(canvas.toDataURL("image/jpeg", .94), "JPEG", 0, 0, size.width, size.height); }
+        pdf.save("sahl-design.pdf");
+      } else {
+        const JSZip = (await import("jszip")).default; const zip = new JSZip();
+        for (let index = 0; index < slides.length; index += 1) { const canvas = await drawSlide(slides[index]!); zip.file(`slide-${index + 1}.png`, canvas.toDataURL("image/png").split(",")[1]!, { base64: true }); }
+        const blob = await zip.generateAsync({ type: "blob" }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "sahl-carousel.zip"; link.click(); URL.revokeObjectURL(link.href);
+      }
+      setNotice("تم تجهيز الملف");
+    } catch { setNotice("تعذّر التصدير؛ جرّب صورة من دون حماية خارجية"); }
   };
+  const contrast = useMemo(() => overlay >= 35 || !slide?.image, [overlay, slide?.image]);
+  if (!slide) return null;
 
-  const downloadPng = () =>
-    guard(async () => {
-      const c = document.createElement("canvas");
-      drawSlide(c, slide, style, logo, active, slides.length);
-      const b = await new Promise<Blob | null>((r) => c.toBlob(r, "image/png"));
-      if (b) save(b, `sahl-slide-${active + 1}.png`);
-    });
-  const downloadZip = () =>
-    guard(async () => {
-      const { default: JSZip } = await import("jszip");
-      const zip = new JSZip();
-      const canvases = await renderAll();
-      await Promise.all(
-        canvases.map(async (c, i) => {
-          const b = await new Promise<Blob | null>((r) => c.toBlob(r, "image/png"));
-          if (b) zip.file(`slide-${String(i + 1).padStart(2, "0")}.png`, b);
-        }),
-      );
-      save(await zip.generateAsync({ type: "blob" }), "sahl-carousel.zip");
-    });
-  const downloadPdf = () =>
-    guard(async () => {
-      const { jsPDF } = await import("jspdf");
-      const [w, h] = SIZES[style.size];
-      const pdf = new jsPDF({ orientation: w > h ? "landscape" : "portrait", unit: "px", format: [w, h], hotfixes: ["px_scaling"] });
-      const canvases = await renderAll();
-      canvases.forEach((c, i) => {
-        if (i) pdf.addPage([w, h], w > h ? "landscape" : "portrait");
-        pdf.addImage(c.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, w, h);
-      });
-      save(pdf.output("blob"), "sahl-carousel.pdf");
-    });
-
-  const saveTemplate = () => {
-    const { size, font, textColor, accent, bg, overlay, pos, titleSize, logoUrl, logoCorner, showNumbers } = style;
-    try {
-      localStorage.setItem(TEMPLATE_KEY, JSON.stringify({ size, font, textColor, accent, bg, overlay, pos, titleSize, logoUrl, logoCorner, showNumbers }));
-      toast.success("حُفظ قالب علامتك — يُطبق تلقائياً على كل تصميم جديد");
-    } catch {
-      toast.error("الشعار كبير جداً للحفظ؛ استخدم صورة أصغر.");
-    }
-  };
-
-  const field = "w-full rounded-xl border border-border bg-background p-2 text-sm";
-  const btn = "inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium disabled:opacity-60";
-  return (
-    <AppShell title="محرر تصميم دانة">
-      <div className="mx-auto grid max-w-6xl gap-6 p-4 lg:grid-cols-[340px_1fr]" dir="rtl">
-        <section className="space-y-3 rounded-2xl border border-border bg-card p-5 text-sm">
-          <div className="flex items-center gap-2 font-semibold">
-            <Palette className="size-5 text-primary" /> الشريحة {active + 1} من {slides.length}
-          </div>
-          <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-border p-3 hover:bg-secondary">
-            <ImagePlus className="size-4" /> {slide.img ? "غيّر صورة الشريحة" : "ارفع صورة (اختياري)"}
-            <input type="file" accept="image/*" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
-          </label>
-          <input className={field} value={slide.title} onChange={(e) => patch({ title: e.target.value })} placeholder="العنوان" />
-          <input className={field} value={slide.sub} onChange={(e) => patch({ sub: e.target.value })} placeholder="النص الداعم" />
-          <input className={field} value={slide.cta} onChange={(e) => patch({ cta: e.target.value })} placeholder="زر الدعوة (اختياري)" />
-
-          <details className="rounded-xl border border-border p-3" open>
-            <summary className="cursor-pointer font-semibold">قالب العلامة (لكل الشرائح)</summary>
-            <div className="mt-3 space-y-3">
-              <select className={field} value={style.size} onChange={(e) => set("size", e.target.value as SizeKey)}>
-                {Object.keys(SIZES).map((k) => (
-                  <option key={k}>{k}</option>
-                ))}
-              </select>
-              <div className="grid grid-cols-2 gap-2">
-                <select className={field} value={style.font} onChange={(e) => set("font", e.target.value)}>
-                  {FONTS.map((f) => (
-                    <option key={f}>{f}</option>
-                  ))}
-                </select>
-                <select className={field} value={style.pos} onChange={(e) => set("pos", e.target.value as Style["pos"])}>
-                  <option value="top">أعلى</option>
-                  <option value="center">وسط</option>
-                  <option value="bottom">أسفل</option>
-                </select>
-              </div>
-              <label className="block">
-                حجم العنوان: {style.titleSize}
-                <input type="range" min={48} max={160} value={style.titleSize} onChange={(e) => set("titleSize", +e.target.value)} className="w-full" />
-              </label>
-              <label className="block">
-                تعتيم الصورة: {style.overlay}٪
-                <input type="range" min={0} max={80} value={style.overlay} onChange={(e) => set("overlay", +e.target.value)} className="w-full" />
-              </label>
-              <div className="grid grid-cols-3 gap-2 text-xs">
-                <label>النص<input type="color" value={style.textColor} onChange={(e) => set("textColor", e.target.value)} className="h-9 w-full" /></label>
-                <label>الزر<input type="color" value={style.accent} onChange={(e) => set("accent", e.target.value)} className="h-9 w-full" /></label>
-                <label>الخلفية<input type="color" value={style.bg} onChange={(e) => set("bg", e.target.value)} className="h-9 w-full" /></label>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <label className="flex cursor-pointer items-center justify-center gap-1 rounded-xl border border-dashed border-border p-2 text-xs hover:bg-secondary">
-                  {logo ? "غيّر الشعار" : "ارفع الشعار"}
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => onLogo(e.target.files?.[0])} />
-                </label>
-                <select className={field} value={style.logoCorner} onChange={(e) => set("logoCorner", e.target.value as Corner)}>
-                  <option value="tr">أعلى يمين</option>
-                  <option value="tl">أعلى يسار</option>
-                  <option value="br">أسفل يمين</option>
-                  <option value="bl">أسفل يسار</option>
-                  <option value="none">بدون شعار</option>
-                </select>
-              </div>
-              <label className="flex items-center gap-2 text-xs">
-                <input type="checkbox" checked={style.showNumbers} onChange={(e) => set("showNumbers", e.target.checked)} /> ترقيم الشرائح (1/5)
-              </label>
-              <button onClick={saveTemplate} className={cn(btn, "w-full border border-border hover:bg-secondary")}>
-                <Save className="size-4" /> احفظ كقالب علامتي
-              </button>
-            </div>
-          </details>
-
-          <div className="grid grid-cols-3 gap-2">
-            <button disabled={busy} onClick={downloadPng} className={cn(btn, "border border-border hover:bg-secondary")}>
-              <Download className="size-4" /> PNG
-            </button>
-            <button disabled={busy} onClick={downloadZip} className={cn(btn, "bg-primary text-primary-foreground")}>
-              <FileArchive className="size-4" /> ZIP
-            </button>
-            <button disabled={busy} onClick={downloadPdf} className={cn(btn, "bg-primary text-primary-foreground")}>
-              <FileText className="size-4" /> PDF
-            </button>
-          </div>
-        </section>
-
-        <div className="space-y-3">
-          <div className="flex items-start justify-center rounded-2xl border border-border bg-secondary/40 p-4">
-            <canvas ref={canvasRef} className="h-auto max-h-[70vh] w-auto max-w-full rounded-lg shadow" />
-          </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {slides.map((s, i) => (
-              <button
-                key={s.id}
-                onClick={() => setActive(i)}
-                className={cn(
-                  "flex h-16 w-24 shrink-0 flex-col items-center justify-center rounded-xl border p-1 text-[11px]",
-                  i === active ? "border-primary bg-primary/10" : "border-border bg-card",
-                )}
-              >
-                <b>{i + 1}</b>
-                <span className="w-full truncate">{s.title}</span>
-              </button>
-            ))}
-            {slides.length < 10 && (
-              <button
-                onClick={() => {
-                  setSlides((all) => [...all, newSlide({ title: `شريحة ${all.length + 1}` })]);
-                  setActive(slides.length);
-                }}
-                className="flex h-16 w-24 shrink-0 items-center justify-center gap-1 rounded-xl border border-dashed border-border text-xs"
-              >
-                <Plus className="size-4" /> شريحة
-              </button>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                if (slides.length >= 10) return;
-                setSlides((all) => [...all.slice(0, active + 1), { ...slide, id: newSlide().id }, ...all.slice(active + 1)]);
-                setActive(active + 1);
-              }}
-              className={cn(btn, "border border-border hover:bg-secondary")}
-            >
-              <Copy className="size-4" /> كرّر الشريحة
-            </button>
-            <button
-              disabled={slides.length < 2}
-              onClick={() => {
-                setSlides((all) => all.filter((_, i) => i !== active));
-                setActive(Math.max(0, active - 1));
-              }}
-              className={cn(btn, "border border-border hover:bg-secondary")}
-            >
-              <Trash2 className="size-4" /> احذف الشريحة
-            </button>
-          </div>
+  return <AppShell title="محرر دانة" lead="حرّر، راجع، وصدّر من مكان واحد" padded={false}>
+    <div className="design-studio" dir="rtl">
+      <header className="design-studio-toolbar">
+        <div className="flex min-w-0 items-center gap-2"><Layers3 className="size-5 text-primary" /><div><strong className="block text-sm">مساحة التصميم</strong><span className="block text-xs text-muted-foreground">{notice}</span></div></div>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={undo} disabled={!history.length} title="تراجع"><Undo2 /></Button>
+          <Button variant="ghost" size="icon" onClick={redo} disabled={!future.length} title="إعادة"><Redo2 /></Button>
+          <Button variant="outline" size="sm" onClick={() => download("png")}><Download /> PNG</Button>
         </div>
-      </div>
-    </AppShell>
-  );
+      </header>
+
+      <aside className="design-studio-panel">
+        <section><label className="design-label">المقاس</label><div className="design-segments">{Object.entries(FORMATS).map(([key, item]) => <Button key={key} variant={format === key ? "default" : "outline"} size="sm" onClick={() => { checkpoint(); setFormat(key as FormatKey); }}>{item.label}</Button>)}</div></section>
+        <section><label className="design-label" htmlFor="design-title">العنوان</label><textarea id="design-title" value={slide.title} maxLength={90} onFocus={checkpoint} onChange={(event) => updateSlide({ title: event.target.value })} className="design-field min-h-24" /><span className="design-count">{slide.title.length}/90</span></section>
+        <section><label className="design-label" htmlFor="design-subtitle">النص المساند</label><textarea id="design-subtitle" value={slide.subtitle} maxLength={180} onFocus={checkpoint} onChange={(event) => updateSlide({ subtitle: event.target.value })} className="design-field min-h-20" /><span className="design-count">{slide.subtitle.length}/180</span></section>
+        <section><label className="design-label" htmlFor="design-cta">زر الدعوة</label><input id="design-cta" value={slide.cta} maxLength={28} onFocus={checkpoint} onChange={(event) => updateSlide({ cta: event.target.value })} className="design-field" /></section>
+        <section><label className="design-label">الألوان</label><div className="design-palettes">{PALETTES.map((item) => <Button key={item.id} type="button" variant="ghost" size="icon" onClick={() => { checkpoint(); setPalette(item.id); }} className={cn("design-swatch", palette === item.id && "is-active")} style={{ background: `linear-gradient(135deg, ${item.bg} 50%, ${item.accent} 50%)` }} title={item.label}>{palette === item.id ? <Check /> : null}</Button>)}</div></section>
+        <section><label className="design-label">محاذاة النص</label><div className="design-segments">{(["right", "center", "left"] as const).map((value) => <Button key={value} variant={align === value ? "default" : "outline"} size="sm" onClick={() => { checkpoint(); setAlign(value); }}>{value === "right" ? "يمين" : value === "center" ? "وسط" : "يسار"}</Button>)}</div></section>
+        <section><div className="flex items-center justify-between"><label className="design-label">الصورة</label><Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}><Upload /> رفع</Button></div><input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; checkpoint(); updateSlide({ image: URL.createObjectURL(file) }); }} />
+          {slide.image ? <div className="mt-3 grid gap-3"><Range label="تكبير" value={imageZoom} min={100} max={220} setValue={setImageZoom} /><Range label="أفقي" value={imageX} min={0} max={100} setValue={setImageX} /><Range label="رأسي" value={imageY} min={0} max={100} setValue={setImageY} /><Range label="وضوح النص" value={overlay} min={0} max={80} setValue={setOverlay} /></div> : null}
+        </section>
+      </aside>
+
+      <main className="design-studio-stage">
+        <div className="design-stage-meta"><span>{size.width} × {size.height}</span><span className={cn("design-check", contrast && "is-good")}>{contrast ? "تباين ممتاز" : "ارفع وضوح النص"}</span></div>
+        <div className="design-canvas-wrap"><article className="design-canvas" style={{ aspectRatio: ratio, backgroundColor: scheme.bg, color: scheme.text, textAlign: align }}>
+          {slide.image ? <><img src={slide.image} alt="" style={{ objectPosition: `${imageX}% ${imageY}%`, transform: `scale(${imageZoom / 100})` }} /><div className="design-canvas-overlay" style={{ opacity: overlay / 100 }} /></> : null}
+          <div className="design-safe-area"><span className="design-brand" style={{ color: scheme.accent }}>سهل × دانة</span><div className="design-copy"><h2 contentEditable suppressContentEditableWarning onBlur={(event) => updateSlide({ title: event.currentTarget.textContent || "" })}>{slide.title}</h2><p contentEditable suppressContentEditableWarning onBlur={(event) => updateSlide({ subtitle: event.currentTarget.textContent || "" })}>{slide.subtitle}</p></div><span className="design-cta" style={{ backgroundColor: scheme.accent, color: scheme.bg }}>{slide.cta}</span></div>
+        </article></div>
+        <div className="design-slide-nav"><Button variant="ghost" size="icon" onClick={() => setActive((value) => Math.max(0, value - 1))} disabled={active === 0}><ArrowRight /></Button><span>{active + 1} / {slides.length}</span><Button variant="ghost" size="icon" onClick={() => setActive((value) => Math.min(slides.length - 1, value + 1))} disabled={active === slides.length - 1}><ArrowLeft /></Button></div>
+      </main>
+
+      <aside className="design-studio-assets">
+        <div className="flex items-center justify-between"><strong className="text-sm">الشرائح</strong><Button variant="outline" size="icon" onClick={addSlide} title="إضافة شريحة"><Plus /></Button></div>
+        <div className="design-slide-list">{slides.map((item, index) => <Button key={item.id} variant="ghost" onClick={() => setActive(index)} className={cn("design-slide-item", active === index && "is-active")}><span>{index + 1}</span><span className="truncate">{item.title}</span></Button>)}</div>
+        <Button variant="ghost" size="sm" onClick={deleteSlide} disabled={slides.length === 1} className="w-full text-destructive"><Trash2 /> حذف الشريحة</Button>
+        <div className="mt-auto grid gap-2 border-t border-border pt-4"><Button variant="outline" onClick={() => download("pdf")}><FileText /> ملف PDF</Button><Button onClick={() => download("zip")}><FileArchive /> تصدير كل الشرائح</Button><div className="flex items-center justify-center gap-1 text-xs text-muted-foreground"><Save className="size-3" /> تُحفظ التعديلات تلقائيًا</div></div>
+      </aside>
+    </div>
+  </AppShell>;
+}
+
+function Range({ label, value, min, max, setValue }: { label: string; value: number; min: number; max: number; setValue: (value: number) => void }) {
+  return <label className="grid gap-1 text-xs font-bold"><span className="flex justify-between"><span>{label}</span><span>{value}%</span></span><input type="range" min={min} max={max} value={value} onChange={(event) => setValue(Number(event.target.value))} className="accent-primary" /></label>;
 }
