@@ -47441,6 +47441,8 @@ html {
 .sahl-arabic-first { display: block; width: fit-content; margin: 0 auto 1rem; padding: .45rem .8rem; border: 1px solid color-mix(in oklab, var(--home-terracotta) 32%, transparent); border-radius: .4rem; color: var(--home-terracotta); font-family: "Almarai", sans-serif; font-size: clamp(.8rem, 1.5vw, 1rem); font-weight: 800; text-align: center; }
 .sahl-cap-card:not(.is-wide) .sahl-device-frame { width: min(100%, 21rem); margin: 1.2rem auto 0; }
 .sahl-cap-card:not(.is-wide) .sahl-device-lid { min-height: 12rem; }
+.sahl-device-screen video { display: block; width: 100%; height: 100%; object-fit: cover; }
+@media (prefers-reduced-motion: reduce) { .sahl-device-screen video { display: none; } .sahl-device-screen video + picture { display: block; } }
 @media (max-width: 720px) { .sahl-arabic-first { width: 100%; line-height: 1.7; } }
 
 @media (max-height: 700px) { .welcome-person:has(.welcome-sample) .welcome-portrait { display: none; } .welcome-person:has(.welcome-sample) .welcome-tasks { display: none; } .welcome-person:has(.welcome-sample) .welcome-sample { max-height: 24dvh; } }
