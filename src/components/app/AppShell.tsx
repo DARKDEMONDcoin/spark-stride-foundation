@@ -240,7 +240,7 @@ function UserMenu({ name }: { name: string | null }) {
         onClick={() => setOpen((v) => !v)}
         aria-label="حسابك"
         aria-expanded={open}
-        className="size-10 overflow-hidden rounded-xl border border-border/60 shadow-card transition-transform hover:-translate-y-0.5"
+        className="app-user-avatar-trigger size-10 shrink-0 overflow-hidden rounded-xl border border-border/60 p-0 shadow-card transition-transform hover:-translate-y-0.5"
       >
         <UserAvatar />
       </button>
@@ -253,7 +253,7 @@ function UserMenu({ name }: { name: string | null }) {
           />
           <div className="absolute end-0 z-50 mt-2 w-[min(88vw,17rem)] rounded-2xl border border-border bg-card p-2 shadow-lift">
             <div className="flex items-center gap-3 px-3 py-2">
-              <Button type="button" variant="ghost" size="icon" onClick={() => { setOpen(false); setPhotoOpen(true); }} aria-label="عرض الصورة الشخصية كاملة" className="size-10 shrink-0 overflow-hidden rounded-xl border border-border/60 p-0"><UserAvatar /></Button>
+              <Button type="button" variant="ghost" size="icon" onClick={() => { setOpen(false); setPhotoOpen(true); }} aria-label="عرض الصورة الشخصية كاملة" className="app-user-avatar-trigger size-10 shrink-0 overflow-hidden rounded-xl border border-border/60 p-0"><UserAvatar /></Button>
               <span className="min-w-0">
                 <p className="truncate text-sm font-bold">{name ?? "حسابك"}</p>
                 {email ? <p className="truncate text-xs text-muted-foreground">{email}</p> : null}

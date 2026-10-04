@@ -19,7 +19,7 @@ export function UserAvatar({
       width={1024}
       height={1024}
       className={cn(
-        "size-full rounded-[inherit] object-cover",
+        "block aspect-square size-full min-h-full min-w-full shrink-0 rounded-[inherit] object-cover object-center",
         !url && fallbackClassName,
         className,
       )}
