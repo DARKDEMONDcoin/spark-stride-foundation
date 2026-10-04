@@ -47733,7 +47733,7 @@ body:has(.chat-composer-dock) .liquid-glass-sahl.sahl-cookie-consent {
 .design-segments{display:flex;flex-wrap:wrap;gap:.35rem}.design-segments>button{flex:1;min-width:max-content}
 .design-palettes{display:flex;gap:.55rem}.design-swatch{position:relative;border:2px solid transparent;border-radius:50%}.design-swatch.is-active{border-color:var(--foreground)}.design-swatch svg{color:var(--card);filter:drop-shadow(0 1px 2px var(--foreground))}
 .design-studio-stage{display:flex;min-width:0;min-height:0;flex-direction:column;align-items:center;justify-content:center;overflow:auto;padding:1.25rem}
-.design-stage-meta{display:flex;width:min(100%,48rem);align-items-center;justify-content:space-between;padding:.5rem;font-size:.72rem;color:var(--muted-foreground)}
+.design-stage-meta{display:flex;width:min(100%,48rem);align-items:center;justify-content:space-between;padding:.5rem;font-size:.72rem;color:var(--muted-foreground)}
 .design-check{border:1px solid var(--border);border-radius:999px;padding:.25rem .55rem}.design-check.is-good{border-color:color-mix(in oklab,var(--jade) 40%,var(--border));color:var(--jade-deep)}
 .design-canvas-wrap{display:grid;width:min(100%,48rem);min-height:20rem;place-items:center}
 .design-canvas{position:relative;width:auto;max-width:100%;max-height:calc(100dvh - 10.5rem);overflow:hidden;border-radius:.4rem;box-shadow:0 28px 70px -28px color-mix(in oklab,var(--foreground) 55%,transparent)}
