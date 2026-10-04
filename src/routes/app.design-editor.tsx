@@ -160,8 +160,8 @@ function DesignEditorPage() {
   if (!slide) return null;
 
   return <AppShell title="محرر دانة" lead="حرّر، راجع، وصدّر من مكان واحد" padded={false}>
-    <div className="design-studio" dir="rtl">
-      <header className="design-studio-toolbar">
+    <div className="design-studio grid min-h-dvh grid-cols-[minmax(16rem,21rem)_minmax(0,1fr)_minmax(12rem,15rem)] grid-rows-[auto_minmax(0,1fr)] bg-muted max-[980px]:grid-cols-[minmax(15rem,18rem)_minmax(0,1fr)] max-[700px]:flex max-[700px]:flex-col" dir="rtl">
+      <header className="design-studio-toolbar col-span-full flex min-h-16 items-center justify-between gap-3 border-b border-border bg-card px-4 py-2">
         <div className="flex min-w-0 items-center gap-2"><Layers3 className="size-5 text-primary" /><div><strong className="block text-sm">مساحة التصميم</strong><span className="block text-xs text-muted-foreground">{notice}</span></div></div>
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" onClick={undo} disabled={!history.length} title="تراجع"><Undo2 /></Button>
