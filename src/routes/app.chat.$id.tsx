@@ -801,7 +801,7 @@ function ChatView({
   const cancelledRef = useRef(false);
 
   const ask = useServerFn(askEmployee);
-  /** إشارة صامتة للتعلّم: «عدّل» أو «أعد التوليد» تقييمٌ حقيقي لا يحتاج سؤال المالك. */
+  /** إشارة صامتة للتعلّم من تعديلات المالك ورفضه، بلا أسئلة إضافية. */
   const sendChatSignal = useServerFn(saveChatSignal);
   const signal = (messageId: string, kind: "edited" | "rejected", originalText: string) => {
     if (!workspace) return;
