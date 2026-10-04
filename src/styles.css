@@ -47438,6 +47438,11 @@ html {
 @media (max-width: 380px) { .welcome-header-note { display: none; } .welcome-industries { grid-template-columns: repeat(2, minmax(0, 1fr)); } .welcome-footer-dots { display: none; } .welcome-team img { width: 1.6rem; height: 1.6rem; } }
 @media (prefers-reduced-motion: reduce) { .welcome-appear { animation: none; } .welcome-progress-track > span { transition: none; } }
 
+.sahl-arabic-first { display: block; width: fit-content; margin: 0 auto 1rem; padding: .45rem .8rem; border: 1px solid color-mix(in oklab, var(--home-terracotta) 32%, transparent); border-radius: .4rem; color: var(--home-terracotta); font-family: "Almarai", sans-serif; font-size: clamp(.8rem, 1.5vw, 1rem); font-weight: 800; text-align: center; }
+.sahl-cap-card:not(.is-wide) .sahl-device-frame { width: min(100%, 21rem); margin: 1.2rem auto 0; }
+.sahl-cap-card:not(.is-wide) .sahl-device-lid { min-height: 12rem; }
+@media (max-width: 720px) { .sahl-arabic-first { width: 100%; line-height: 1.7; } }
+
 @media (max-height: 700px) { .welcome-person:has(.welcome-sample) .welcome-portrait { display: none; } .welcome-person:has(.welcome-sample) .welcome-tasks { display: none; } .welcome-person:has(.welcome-sample) .welcome-sample { max-height: 24dvh; } }
 @media (max-height: 700px) { .welcome-website .welcome-disclaimer { margin-top: .25rem; font-size: .62rem; } .welcome-website .welcome-url-form { margin-top: .45rem; } .welcome-website .welcome-findings { margin-top: .35rem; padding: .45rem .6rem; } .welcome-website .welcome-findings-summary { margin-top: .25rem; max-height: 1.3rem; white-space: nowrap; text-overflow: ellipsis; } .welcome-website .welcome-findings-tabs { margin-top: .2rem; } .welcome-website .welcome-facts { padding-top: .25rem; } .welcome-website .welcome-skip { margin-top: .15rem; } }
 
