@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ListenButton } from "@/components/app/ListenButton";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,8 +9,6 @@ import {
   Check,
   Copy,
   Share2,
-  RefreshCw,
-  Download,
   X,
   SlidersHorizontal,
   BookOpenText,
@@ -140,17 +138,13 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-/** أزرار أسفل رد الموظف: نسخ · مشاركة · تنزيل · إعادة التوليد. */
+/** أزرار عامة أسفل الرد: الاستماع والنسخ والمشاركة فقط. */
 function MessageActions({
   text,
-  onRegenerate,
-  disabled,
   listen,
 }: {
   listen?: React.ReactNode;
   text: string;
-  onRegenerate: (() => void) | null;
-  disabled: boolean;
 }) {
   const [shared, setShared] = useState(false);
   /** المؤقّت يُلغى عند الخروج: بدونه يُحدَّث زر مختفٍ بعد تبديل المحادثة. */
@@ -177,15 +171,6 @@ function MessageActions({
       /* أُلغيت المشاركة */
     }
   };
-  const download = () => {
-    const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `sahl-${new Date().toISOString().slice(0, 10)}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
   return (
     <span className="flex flex-wrap items-center gap-1.5">
       {listen}
@@ -193,20 +178,6 @@ function MessageActions({
       <button type="button" onClick={() => void share()} className={btn} aria-label="مشاركة">
         <Share2 className="size-3" /> {shared ? "نُسخ للمشاركة" : "مشاركة"}
       </button>
-      <button type="button" onClick={download} className={btn} aria-label="تنزيل">
-        <Download className="size-3" /> تنزيل
-      </button>
-      {onRegenerate ? (
-        <button
-          type="button"
-          onClick={onRegenerate}
-          disabled={disabled}
-          className={btn}
-          aria-label="إعادة التوليد"
-        >
-          <RefreshCw className="size-3" /> أعد التوليد
-        </button>
-      ) : null}
     </span>
   );
 }
@@ -678,7 +649,7 @@ function useTypewriter(lines: string[], pause = 1700, enabled = true) {
   const [length, setLength] = useState(0);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!enabled) {
       setLine(0);
       setLength(lines[0]?.length ?? 0);
@@ -1101,8 +1072,10 @@ function ChatView({
       return;
     }
     el.style.height = "auto";
-    const safeMaximum = Math.min(window.innerHeight * 0.55, 512);
-    el.style.height = `${Math.min(el.scrollHeight, safeMaximum)}px`;
+    const safeMaximum = Math.min(window.innerHeight * (window.innerWidth < 640 ? 0.42 : 0.5), 448);
+    const nextHeight = Math.min(el.scrollHeight, safeMaximum);
+    el.style.height = `${nextHeight}px`;
+    el.style.overflowY = el.scrollHeight > safeMaximum ? "auto" : "hidden";
   }, [draft]);
 
   /** يحاول تنفيذ الرسالة كأمر على المخرج الجاهز؛ يعيد true لو استُهلكت. */
@@ -1565,6 +1538,7 @@ function ChatView({
                             employeeId={id}
                             employeeName={member.name}
                             body={body}
+                            request={priorRequest}
                             workspaceId={workspace?.id}
                             missingProvider={missingProviderFor(priorRequest)}
                           />
@@ -1588,17 +1562,6 @@ function ChatView({
                                   ) : null
                                 }
                                 text={body}
-                                disabled={busy}
-                                onRegenerate={
-                                  priorRequest
-                                    ? () => {
-                                        signal(m.id, "rejected", m.body);
-                                        void submit(
-                                          `${priorRequest}\n\n(أعد صياغة الرد السابق بزاوية مختلفة وأقوى، وحافظ على نفس الطلب.)`,
-                                        );
-                                      }
-                                    : null
-                                }
                               />
                             </span>
                           ) : null}
@@ -1816,7 +1779,7 @@ function ChatView({
                 dir="auto"
                 rows={1}
                 className={cn(
-                  "chat-composer-textarea field-sizing-fixed min-h-12 resize-none bg-transparent px-3 py-2.5",
+                  "chat-composer-textarea min-h-12 resize-none bg-transparent px-3 py-2.5",
                   draft ? "overflow-y-auto" : "overflow-hidden",
                 )}
               />
