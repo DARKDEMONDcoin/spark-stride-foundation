@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/button";
-import { DESIGN_DRAFT_KEY } from "@/components/app/OutputActions";
+import { DESIGN_DRAFT_KEY } from "@/lib/design-draft";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight, Check, Download, FileArchive, FileText, Image as ImageIcon, Layers3, Plus, Redo2, Save, Trash2, Undo2, Upload } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Download, FileArchive, FileText, Layers3, Plus, Redo2, Save, Trash2, Undo2, Upload } from "lucide-react";
 
 export const Route = createFileRoute("/app/design-editor")({
   head: () => ({ meta: [

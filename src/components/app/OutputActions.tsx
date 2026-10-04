@@ -1,5 +1,6 @@
 /** إجراءات المخرج المتخصصة؛ لا تظهر إلا عندما يثبت الطلب والناتج نوع المخرج. */
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { CalendarDays, Eye, Globe, LineChart, ListChecks, Palette, Send, Sparkles, Users } from "lucide-react";
 
 import { ConnectNow } from "@/components/app/ConnectNow";
@@ -8,10 +9,11 @@ import { PlatformPreviewDialog } from "@/components/app/PlatformPreview";
 import { requestedPublishTargets } from "@/lib/platforms";
 import { appLabel } from "@/components/site/AppIcon";
 import { cn } from "@/lib/utils";
+import { DESIGN_DRAFT_KEY } from "@/lib/design-draft";
+import { Button } from "@/components/ui/button";
 
 type QuickLink = { to: string; label: string; icon: typeof CalendarDays };
 export type OutputKind = "design" | "post" | "email" | "event" | "article" | "seo" | "report" | "plan" | "leads" | "web" | "general";
-export const DESIGN_DRAFT_KEY = "sahl:design-editor:draft";
 
 export function firstImageUrl(body: string): string | null {
   const markdown = body.match(/!\[[^\]]*\]\((https?:\/\/[^\s)]+)\)/);
@@ -66,14 +68,14 @@ export function OutputActions({ employeeId, employeeName, body, request, workspa
   if (kind === "general" && !missingProvider) return null;
 
   return <div className={cn("output-actions mt-3 flex flex-wrap items-center gap-1.5", className)}>
-    {links.map((link) => <a key={`${link.to}-${link.label}`} href={link.to} className="output-action-chip inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[0.72rem] font-bold transition-colors hover:bg-secondary"><link.icon className="size-3.5 shrink-0" />{link.label}</a>)}
-    {kind === "design" ? <button type="button" onClick={() => {
+    {links.map((link) => <Link key={`${link.to}-${link.label}`} to={link.to} className="output-action-chip inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[0.72rem] font-bold transition-colors hover:bg-secondary"><link.icon className="size-3.5 shrink-0" />{link.label}</Link>)}
+    {kind === "design" ? <Button type="button" variant="outline" size="sm" onClick={() => {
       try {
         sessionStorage.setItem(DESIGN_DRAFT_KEY, JSON.stringify({ body, request, imageUrl, employeeId, savedAt: Date.now() }));
       } catch { /* يظل المحرر قابلاً للفتح حتى لو منع المتصفح التخزين. */ }
       onEditDesign?.("/app/design-editor?seed=chat");
-    }} className="output-action-chip inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[0.72rem] font-bold transition-colors hover:bg-secondary"><Palette className="size-3.5 shrink-0" />عدّل التصميم</button> : null}
-    {kind === "post" || kind === "design" ? <><button type="button" onClick={() => setPlatformOpen(true)} className="output-action-chip inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/8 px-3 py-1.5 text-[0.72rem] font-bold text-primary transition-colors hover:bg-primary/15"><Eye className="size-3.5" /> شوفه على المنصة</button><PlatformPreviewDialog open={platformOpen} onOpenChange={setPlatformOpen} post={{ provider: targetPlatform, body: body.replace(/!\[[^\]]*\]\([^)]+\)/g, "").trim(), image_url: imageUrl }} /></> : null}
+    }} className="output-action-chip rounded-full"><Palette className="size-3.5 shrink-0" />عدّل التصميم</Button> : null}
+    {kind === "post" || kind === "design" ? <><Button type="button" variant="outline" size="sm" onClick={() => setPlatformOpen(true)} className="output-action-chip rounded-full border-primary/30 bg-primary/8 text-primary hover:bg-primary/15"><Eye className="size-3.5" /> شوفه على المنصة</Button><PlatformPreviewDialog open={platformOpen} onOpenChange={setPlatformOpen} post={{ provider: targetPlatform, body: body.replace(/!\[[^\]]*\]\([^)]+\)/g, "").trim(), image_url: imageUrl }} /></> : null}
     {supportsProject ? <SendToProject employeeId={employeeId} employeeName={employeeName} body={body} /> : null}
     {missingProvider ? <span className="inline-flex items-center gap-2 rounded-full border border-sky/30 bg-sky/10 px-2 py-1"><span className="text-[0.7rem] font-bold text-ink-soft">{appLabel(missingProvider)} غير مربوط</span><ConnectNow workspaceId={workspaceId} provider={missingProvider} size="sm" label="اربطه للتنفيذ الآلي" /></span> : null}
   </div>;
