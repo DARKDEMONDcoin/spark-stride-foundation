@@ -30,6 +30,7 @@ import {
   ScrollText,
   LayoutDashboard,
   ChevronDown,
+  Globe,
   Palette,
   MailWarning,
   Settings2,
@@ -2003,7 +2004,7 @@ function ChatView({
                 barPanel === "apps"
                   ? `تكاملات ${member.name}`
                   : barPanel === "brand"
-                    ? "موقع النشاط"
+                        ? `تعليمات ${member.name}`
                     : `تشغيل ومتابعة ${member.name}`
               }
             >
@@ -2062,7 +2063,7 @@ function ChatView({
                   })}
                 </div>
               ) : barPanel === "brand" ? (
-                <EmployeeGuidelines workspaceId={workspace?.id} employeeId={id} employeeName={member.name} />
+                <EmployeeGuidelines {...(workspace?.id ? { workspaceId: workspace.id } : {})} employeeId={id} employeeName={member.name} />
               ) : (
                 <div className="chat-work-sheet">
                   <div className="chat-work-links" aria-label="أدوات التشغيل الأساسية">
