@@ -784,7 +784,7 @@ function ChatView({
       WORK_TOOLS.find((item) => item.to.replace(/\/$/, "") === clean) ??
       ALL_APP_TOOLS.find((item) => item.to.replace(/\/$/, "") === clean);
     if (!tool) return false;
-    setEmbeddedTool({ tool, mode: "inline" });
+    setEmbeddedTool({ tool: { ...tool, to: path }, mode: "inline" });
     setBarPanel(null);
     return true;
   };
@@ -1541,6 +1541,11 @@ function ChatView({
                             request={priorRequest}
                             workspaceId={workspace?.id}
                             missingProvider={missingProviderFor(priorRequest)}
+                            onEditDesign={(path) => {
+                              if (openAppInChat(path)) {
+                                setEmbeddedTool((current) => current ? { ...current, mode: "expanded" } : current);
+                              }
+                            }}
                           />
                         ) : null}
 
@@ -1717,7 +1722,7 @@ function ChatView({
                   </button>
                 </header>
                 <iframe
-                  src={`${embeddedTool.tool.to}?embedded=1&employee=${encodeURIComponent(member.id)}`}
+                  src={`${embeddedTool.tool.to}${embeddedTool.tool.to.includes("?") ? "&" : "?"}embedded=1&employee=${encodeURIComponent(member.id)}`}
                   title={embeddedTool.tool.title}
                 />
               </section>
@@ -1943,7 +1948,7 @@ function ChatView({
                 <span>داخل الرسائل</span>
               </button>
             </header>
-            <iframe src={`${embeddedTool.tool.to}?embedded=1&employee=${encodeURIComponent(member.id)}`} title={embeddedTool.tool.title} />
+            <iframe src={`${embeddedTool.tool.to}${embeddedTool.tool.to.includes("?") ? "&" : "?"}embedded=1&employee=${encodeURIComponent(member.id)}`} title={embeddedTool.tool.title} />
           </section>
         ) : null}
 

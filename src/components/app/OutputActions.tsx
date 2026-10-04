@@ -1,18 +1,17 @@
 /** إجراءات المخرج المتخصصة؛ لا تظهر إلا عندما يثبت الطلب والناتج نوع المخرج. */
-import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { CalendarDays, Eye, Globe, LineChart, ListChecks, Palette, Send, Sparkles, Users } from "lucide-react";
 
 import { ConnectNow } from "@/components/app/ConnectNow";
-import { OutputPreview } from "@/components/app/OutputPreview";
 import { SendToProject } from "@/components/app/workspace/SendToProject";
 import { PlatformPreviewDialog } from "@/components/app/PlatformPreview";
 import { requestedPublishTargets } from "@/lib/platforms";
 import { appLabel } from "@/components/site/AppIcon";
 import { cn } from "@/lib/utils";
 
-type QuickLink = { to: string; label: string; icon: typeof CalendarDays; search?: Record<string, string> };
+type QuickLink = { to: string; label: string; icon: typeof CalendarDays };
 export type OutputKind = "design" | "post" | "email" | "event" | "article" | "seo" | "report" | "plan" | "leads" | "web" | "general";
+export const DESIGN_DRAFT_KEY = "sahl:design-editor:draft";
 
 export function firstImageUrl(body: string): string | null {
   const markdown = body.match(/!\[[^\]]*\]\((https?:\/\/[^\s)]+)\)/);
@@ -24,7 +23,7 @@ export function firstImageUrl(body: string): string | null {
 export function detectOutputKind(employeeId: string, body: string, imageUrl: string | null, request = ""): OutputKind {
   const asked = request.toLowerCase();
   const combined = `${request}\n${body}`.toLowerCase();
-  if (imageUrl) return "design";
+  if (employeeId === "dana" && imageUrl) return "design";
   if (employeeId === "dana" && /(صم[مّ]|تصميم|هوية بصرية|شعار|بانر|بوستر|صورة)/.test(asked) && body.length > 160) return "design";
   if (employeeId === "eva" && (/(^|\n)\s*(الموضوع|subject)\s*[:：]/i.test(body) || /(اكتب|جهز|صياغة|رد).{0,20}(بريد|إيميل|رسالة)/.test(asked))) return "email";
   if (employeeId === "eva" && /(اجتماع|موعد|حجز|تقويم|meeting)/.test(asked) && /(الساعة|\d{1,2}:\d{2}|صباح|مساء|بتوقيت|موعد)/.test(combined)) return "event";
@@ -38,10 +37,9 @@ export function detectOutputKind(employeeId: string, body: string, imageUrl: str
   return "general";
 }
 
-function linksFor(kind: OutputKind, imageUrl: string | null): QuickLink[] {
-  const image = imageUrl ? { img: imageUrl } : undefined;
+function linksFor(kind: OutputKind): QuickLink[] {
   switch (kind) {
-    case "design": return [{ to: "/app/design-editor", label: "عدّل التصميم", icon: Palette, ...(image ? { search: image } : {}) }];
+    case "design": return [];
     case "post": return [{ to: "/app/calendar", label: "جدوله", icon: CalendarDays }, { to: "/app/queue", label: "طابور النشر", icon: Send }];
     case "email": return [{ to: "/app/inbox-watch", label: "راجع البريد والإرسال", icon: Send }];
     case "event": return [{ to: "/app/tasks", label: "المهام والمواعيد", icon: CalendarDays }];
@@ -55,23 +53,27 @@ function linksFor(kind: OutputKind, imageUrl: string | null): QuickLink[] {
   }
 }
 
-export function OutputActions({ employeeId, employeeName, body, request, workspaceId, missingProvider, className }: {
+export function OutputActions({ employeeId, employeeName, body, request, workspaceId, missingProvider, onEditDesign, className }: {
   employeeId: string; employeeName: string; body: string; request: string; workspaceId: string | undefined;
-  missingProvider?: string | null; className?: string;
+  missingProvider?: string | null; onEditDesign?: (path: string) => void; className?: string;
 }) {
   const imageUrl = firstImageUrl(body);
   const kind = detectOutputKind(employeeId, body, imageUrl, request);
-  const links = linksFor(kind, imageUrl);
+  const links = linksFor(kind);
   const [platformOpen, setPlatformOpen] = useState(false);
   const targetPlatform = (() => { try { return requestedPublishTargets(request)[0] ?? "instagram"; } catch { return "instagram"; } })();
-  const supportsPreview = kind === "post" || kind === "email" || kind === "design";
   const supportsProject = ["plan", "report", "leads", "seo", "article"].includes(kind);
   if (kind === "general" && !missingProvider) return null;
 
   return <div className={cn("output-actions mt-3 flex flex-wrap items-center gap-1.5", className)}>
-    {links.map((link) => <Link key={`${link.to}-${link.label}`} to={link.to} {...(link.search ? { search: link.search as never } : {})} className="output-action-chip inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[0.72rem] font-bold transition-colors hover:bg-secondary"><link.icon className="size-3.5 shrink-0" />{link.label}</Link>)}
+    {links.map((link) => <a key={`${link.to}-${link.label}`} href={link.to} className="output-action-chip inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[0.72rem] font-bold transition-colors hover:bg-secondary"><link.icon className="size-3.5 shrink-0" />{link.label}</a>)}
+    {kind === "design" ? <button type="button" onClick={() => {
+      try {
+        sessionStorage.setItem(DESIGN_DRAFT_KEY, JSON.stringify({ body, request, imageUrl, employeeId, savedAt: Date.now() }));
+      } catch { /* يظل المحرر قابلاً للفتح حتى لو منع المتصفح التخزين. */ }
+      onEditDesign?.("/app/design-editor?seed=chat");
+    }} className="output-action-chip inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[0.72rem] font-bold transition-colors hover:bg-secondary"><Palette className="size-3.5 shrink-0" />عدّل التصميم</button> : null}
     {kind === "post" || kind === "design" ? <><button type="button" onClick={() => setPlatformOpen(true)} className="output-action-chip inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/8 px-3 py-1.5 text-[0.72rem] font-bold text-primary transition-colors hover:bg-primary/15"><Eye className="size-3.5" /> شوفه على المنصة</button><PlatformPreviewDialog open={platformOpen} onOpenChange={setPlatformOpen} post={{ provider: targetPlatform, body: body.replace(/!\[[^\]]*\]\([^)]+\)/g, "").trim(), image_url: imageUrl }} /></> : null}
-    {supportsPreview ? <OutputPreview employeeId={employeeId} employeeName={employeeName} body={body} /> : null}
     {supportsProject ? <SendToProject employeeId={employeeId} employeeName={employeeName} body={body} /> : null}
     {missingProvider ? <span className="inline-flex items-center gap-2 rounded-full border border-sky/30 bg-sky/10 px-2 py-1"><span className="text-[0.7rem] font-bold text-ink-soft">{appLabel(missingProvider)} غير مربوط</span><ConnectNow workspaceId={workspaceId} provider={missingProvider} size="sm" label="اربطه للتنفيذ الآلي" /></span> : null}
   </div>;
