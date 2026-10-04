@@ -47250,6 +47250,14 @@ html {
   height: 2rem !important; min-height: 2rem !important; min-width: 2rem;
   padding-inline: 0.5rem; border-radius: 0.625rem; font-size: 0.75rem;
 }
+.app-shell.is-chat-shell .app-topbar-controls .app-user-avatar-trigger {
+  width: 2.25rem !important;
+  min-width: 2.25rem !important;
+  height: 2.25rem !important;
+  min-height: 2.25rem !important;
+  flex: 0 0 2.25rem !important;
+  padding: 0 !important;
+}
 .app-shell.is-chat-shell .chat-presence { height: 1.75rem; padding-inline: 0.5rem; font-size: 0.7rem; }
 
 /* فقاعة المستخدم بحجم محتواها، وشريط الموظف صف واحد في كل المقاسات. */
