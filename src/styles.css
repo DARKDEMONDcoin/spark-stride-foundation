@@ -47689,3 +47689,23 @@ body:has(.chat-composer-dock) .liquid-glass-sahl.sahl-cookie-consent {
 @media (prefers-reduced-motion: reduce) {
   .lux-stage *, .lux-stage, .lux-card::before, .lux-gold-text { animation: none !important; }
 }
+
+/* تعليمات كل موظف: بطاقات عملية خفيفة داخل لوحة مقدمة المحادثة. */
+.employee-guidelines { display: grid; gap: .75rem; margin-top: .75rem; }
+.employee-guidelines-intro { padding-inline: .2rem; }
+.employee-guidelines-intro p { font-weight: 900; font-size: .9rem; color: var(--foreground); }
+.employee-guidelines-intro span { display: block; margin-top: .15rem; font-size: .72rem; line-height: 1.6; color: var(--muted-foreground); }
+.employee-guideline-section { overflow: hidden; border: 1px solid var(--border); border-radius: .65rem; background: var(--card); }
+.employee-guideline-section > header { display: grid; gap: .15rem; padding: .75rem .85rem; border-bottom: 1px solid var(--border); }
+.employee-guideline-section > header strong { font-size: .78rem; color: var(--foreground); }
+.employee-guideline-section > header span { font-size: .66rem; color: var(--muted-foreground); }
+.employee-guideline-defaults { display: grid; gap: .45rem; padding: .7rem .85rem .4rem; }
+.employee-guideline-defaults p { display: flex; align-items: flex-start; gap: .45rem; font-size: .7rem; line-height: 1.65; color: var(--foreground); }
+.employee-guideline-defaults svg { flex: 0 0 auto; margin-top: .18rem; color: var(--primary); }
+.employee-guideline-section ul { display: grid; gap: .35rem; padding: .35rem .7rem; }
+.employee-guideline-section li { display: flex; align-items: center; gap: .55rem; border-radius: .5rem; background: var(--secondary); padding: .45rem .55rem; }
+.employee-guideline-section li > span { min-width: 0; flex: 1; font-size: .7rem; line-height: 1.55; }
+.employee-guideline-section li > span.is-paused { color: var(--muted-foreground); text-decoration: line-through; }
+.employee-guideline-section form { display: flex; align-items: center; gap: .35rem; margin: .45rem .7rem .7rem; border: 1px solid var(--border); border-radius: .55rem; background: var(--background); padding: .2rem .35rem; }
+.employee-guideline-section input { min-width: 0; flex: 1; border: 0; background: transparent; padding: .5rem .35rem; font-size: .7rem; outline: none; }
+.employee-guideline-section form:focus-within { border-color: color-mix(in oklab, var(--primary) 55%, var(--border)); box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 10%, transparent); }

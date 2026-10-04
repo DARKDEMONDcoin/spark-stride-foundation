@@ -408,13 +408,14 @@ export function useSetIntegrationStatus(workspaceId?: string) {
 export function useAddBrainItem(workspaceId?: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (item: { kind: string; title: string; body?: string; meta?: string }) => {
+    mutationFn: async (item: { kind: string; title: string; body?: string; meta?: string; usedBy?: string[] }) => {
       const { error } = await supabase.from("brain_items").insert({
         workspace_id: workspaceId!,
         kind: item.kind,
         title: item.title,
         body: item.body ?? null,
         meta: item.meta ?? null,
+        ...(item.usedBy ? { used_by: item.usedBy } : {}),
       });
       if (error) throw new Error(error.message);
     },
@@ -461,6 +462,17 @@ export function useToggleBrainItem(workspaceId?: string) {
         .update({ used_by: active ? ["sonny", "eva", "sam", "nour", "dana", "adam"] : [] })
         .eq("id", id)
         .eq("workspace_id", workspaceId!);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["brain", workspaceId] }),
+  });
+}
+
+export function useToggleEmployeeGuideline(workspaceId: string | undefined, employeeId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
+      const { error } = await supabase.from("brain_items").update({ used_by: active ? [employeeId] : [] }).eq("id", id).eq("workspace_id", workspaceId!);
       if (error) throw new Error(error.message);
     },
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["brain", workspaceId] }),

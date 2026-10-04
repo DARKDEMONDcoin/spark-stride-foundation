@@ -44,7 +44,6 @@ import { ConnectNow } from "@/components/app/ConnectNow";
 import { InlineApproval } from "@/components/app/InlineApproval";
 import { getMember } from "@/data/team";
 import {
-  useBrainItems,
   useEmployeeConversation,
   useIntegrations,
   useMessages,
@@ -53,9 +52,8 @@ import {
   useTasks,
   useWorkspace,
   useChatWorkspace,
-  useUpdateWorkspace,
 } from "@/lib/data";
-import { askEmployee, runSkill } from "@/lib/ai.functions";
+import { askEmployee } from "@/lib/ai.functions";
 import { reviseEmployeeAction } from "@/lib/employee-actions.functions";
 import { parseChatCommand } from "@/lib/chat-commands";
 import { saveChatSignal } from "@/lib/learning.functions";
@@ -74,8 +72,7 @@ import { ActionPanel } from "@/components/app/ActionPanel";
 import { ActionCard, type PendingAction } from "@/components/app/ActionCard";
 import { UserAvatar } from "@/components/app/UserAvatar";
 import { PersonAvatar } from "@/components/app/PersonAvatar";
-import { BusinessProfileCard } from "@/components/app/BusinessProfileCard";
-import { SkillPalette } from "@/components/app/SkillPalette";
+import { EmployeeGuidelines } from "@/components/app/EmployeeGuidelines";
 import { Portrait } from "@/components/site/Portrait";
 import { streamEmployeeTurn, type BrowserEvent } from "@/lib/employee-stream";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,7 +84,6 @@ import {
   type Aspect,
 } from "@/components/app/MediaStudio";
 
-import { featuredSkillsFor, skillsFor, type Skill } from "@/data/skills";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Message, MessageContent } from "@/components/ai-elements/message";
@@ -737,11 +733,9 @@ function ChatView({
   const { data: conversation } = useEmployeeConversation(workspace?.id, id);
   const conversationId = conversation?.id;
   const markConversationRead = useMarkConversationRead(workspace?.id);
-  const updateWorkspace = useUpdateWorkspace();
   const { data: messages } = useMessages(workspace?.id, id, conversationId);
   const { data: tasks } = useTasks(workspace?.id);
   const { data: integrations } = useIntegrations(workspace?.id);
-  useBrainItems(workspace?.id);
   const { prompt: prefill } = Route.useSearch();
   const [draft, setDraft] = useState(prefill ?? "");
   useEffect(() => {
@@ -836,7 +830,6 @@ function ChatView({
   const cancelledRef = useRef(false);
 
   const ask = useServerFn(askEmployee);
-  const runSkillFn = useServerFn(runSkill);
   /** إشارة صامتة للتعلّم: «عدّل» أو «أعد التوليد» تقييمٌ حقيقي لا يحتاج سؤال المالك. */
   const sendChatSignal = useServerFn(saveChatSignal);
   const signal = (messageId: string, kind: "edited" | "rejected", originalText: string) => {
@@ -845,8 +838,6 @@ function ChatView({
       data: { workspaceId: workspace.id, employeeId: id, messageId, kind, originalText },
     }).catch(() => undefined);
   };
-  const employeeSkills = skillsFor(id);
-  const quickSkills = featuredSkillsFor(id).slice(0, 6);
   const employeeCopy: { prompts: string[]; greetings: string[] } =
     EMPLOYEE_COPY[id] ?? EMPLOYEE_COPY["sonny"]!;
   // أثناء وجود رسائل لا نشغّل مؤقتات كتابة مستمرة تعيد رسم صفحة المحادثة كلها.
@@ -1045,30 +1036,7 @@ function ChatView({
     },
   });
 
-  const skillRun = useMutation({
-    mutationFn: async (p: { skill: Skill; values: Record<string, string> }) => {
-      if (!conversationId) throw new Error("المحادثة ليست جاهزة بعد. حاول مرة أخرى.");
-      const activeConversationId = conversationId;
-      return runSkillFn({
-        data: {
-          workspaceId: workspace!.id,
-          employeeId: id,
-          skillId: p.skill.id,
-          values: p.values,
-          conversationId: activeConversationId,
-        },
-      });
-    },
-    onSuccess: (res) => {
-      setSavedTask(res?.taskId ?? null);
-      void qc.invalidateQueries({ queryKey: ["messages", workspace?.id, id, conversationId] });
-      void qc.invalidateQueries({ queryKey: ["messages-last", workspace?.id] });
-      void qc.invalidateQueries({ queryKey: ["tasks", workspace?.id] });
-    },
-    onError: (e: unknown) => setError(friendlyChatError(e, "تعذّر تنفيذ المهمة")),
-  });
-
-  const busy = send.isPending || skillRun.isPending;
+  const busy = send.isPending;
 
   const messageRequests = useMemo(() => {
     let last = "";
@@ -1107,7 +1075,6 @@ function ChatView({
   }, [
     messages?.length,
     send.isPending,
-    skillRun.isPending,
     liveStep,
     liveText,
     stickToBottom,
@@ -1261,7 +1228,6 @@ function ChatView({
     setLiveText("");
     setError(null);
     send.reset();
-    skillRun.reset();
     inputRef.current?.focus();
   };
 
@@ -1338,13 +1304,6 @@ function ChatView({
             </Button>
             <Button ref={(button) => { barPanelButtonRefs.current.apps = button; }} type="button" variant="ghost" size="sm" className={cn("chat-nav-button", barPanel === "apps" && "is-active")} aria-label="التكاملات" title="تكاملات الموظف" aria-expanded={barPanel === "apps"} onClick={() => toggleBarPanel("apps")}>
               <PlugZap className="size-4" /><span>التكاملات</span>
-            </Button>
-            <Button type="button" variant="ghost" size="sm" className="chat-nav-button" aria-label="المتصفح المنفّذ" title={`متصفح ${member.name}`} onClick={() => {
-              const browserTool = WORK_TOOLS.find((tool) => tool.id === "browser");
-              if (browserTool) setEmbeddedTool({ tool: browserTool, mode: "expanded" });
-              setBarPanel(null);
-            }}>
-              <Globe className="size-4" /><span>المتصفح</span>
             </Button>
           </div>
           <div className="chat-employee-end-actions">
@@ -1838,15 +1797,6 @@ function ChatView({
                 />
               </div>
             ) : null}
-            <div className="pointer-events-auto mx-auto mb-2 flex w-full max-w-none">
-              <SkillPalette
-                skills={employeeSkills}
-                quick={quickSkills}
-                disabled={!workspace || busy}
-                pending={skillRun.isPending}
-                onRun={(skill, values) => skillRun.mutate({ skill, values })}
-              />
-            </div>
             <PromptInput
               onSubmit={(message) =>
                 submit(
@@ -2054,7 +2004,7 @@ function ChatView({
                 barPanel === "apps"
                   ? `تكاملات ${member.name}`
                   : barPanel === "brand"
-                    ? "موقع النشاط"
+                        ? `تعليمات ${member.name}`
                     : `تشغيل ومتابعة ${member.name}`
               }
             >
@@ -2064,21 +2014,21 @@ function ChatView({
                 ) : barPanel === "work" ? (
                   <Bot className="size-4 text-primary" />
                 ) : (
-                  <Globe className="size-4 text-primary" />
+                    <BookOpenText className="size-4 text-primary" />
                 )}
                 <div>
                   <p>
                     {barPanel === "apps"
                       ? `تكاملات ${member.name}`
                       : barPanel === "brand"
-                        ? "موقع النشاط"
+                        ? `تعليمات ${member.name}`
                        : `تشغيل ومتابعة ${member.name}`}
                   </p>
                   <span>
                     {barPanel === "apps"
                       ? "اربط الحسابات التي يحتاجها من هنا مباشرة"
                       : barPanel === "brand"
-                        ? "المصادر التي يقرأها ونبرة كتابته"
+                        ? "تفضيلات تخصصه التي يطبقها تلقائياً"
                          : "كل ما يستطيع تنفيذه ومتابعته"}
                   </span>
                 </div>
@@ -2113,23 +2063,7 @@ function ChatView({
                   })}
                 </div>
               ) : barPanel === "brand" ? (
-                <div className="mt-3 space-y-3">
-                  {workspace ? (
-                    <>
-                      <label className="flex items-center justify-between gap-3 rounded-lg border border-border p-3 text-xs font-bold">
-                        <span>استخدام موقع النشاط في ردود كل الموظفين</span>
-                        <input
-                          type="checkbox"
-                          checked={workspace.use_website_context}
-                          disabled={updateWorkspace.isPending}
-                          onChange={(event) => updateWorkspace.mutate({ id: workspace.id, patch: { use_website_context: event.target.checked } })}
-                          className="size-4 accent-primary"
-                        />
-                      </label>
-                      <BusinessProfileCard workspaceId={workspace.id} website={workspace.website} profile={workspace.profile as never} compact className="rounded-lg p-3 sm:p-3" />
-                    </>
-                  ) : null}
-                </div>
+                <EmployeeGuidelines {...(workspace?.id ? { workspaceId: workspace.id } : {})} employeeId={id} employeeName={member.name} />
               ) : (
                 <div className="chat-work-sheet">
                   <div className="chat-work-links" aria-label="أدوات التشغيل الأساسية">

@@ -44,6 +44,7 @@ const cols: { t: string; l: { label: string; to: string }[] }[] = [
       { label: "معالجة البيانات (DPA)", to: "/dpa" },
       { label: "المعالِجون الفرعيون", to: "/subprocessors" },
       { label: "الاشتراك والاسترداد", to: "/refunds" },
+      { label: "شروط برنامج الإحالة", to: "/referral-terms" },
     ],
   },
 ];
