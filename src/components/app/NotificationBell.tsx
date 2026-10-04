@@ -72,10 +72,13 @@ export function NotificationBell() {
               ))}
               {notes.map((n) => (
                 <li key={n.id} className={cn("flex gap-3 px-4 py-3.5", !n.read_at && "bg-secondary/60")}>
-                  <span className={cn("grid size-9 shrink-0 place-items-center rounded-full", n.kind === "invite_declined" ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary")}>
-                    {(() => { const Icon = KIND_ICON[n.kind] ?? UserCheck; return <Icon className="size-4" />; })()}
-                  </span>
+                  {n.actorName ? <PersonAvatar avatar={n.actorAvatar} name={n.actorName} className="size-9" /> : (
+                    <span className={cn("grid size-9 shrink-0 place-items-center rounded-full", n.kind === "invite_declined" ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary")}>
+                      {(() => { const Icon = KIND_ICON[n.kind] ?? UserCheck; return <Icon className="size-4" />; })()}
+                    </span>
+                  )}
                   <button type="button" className="min-w-0 flex-1 text-start" onClick={() => n.workspace_id && navigate({ to: "/app/workspace", search: { workspaceId: n.workspace_id } })}>
+                    {n.actorName ? <p className="text-xs font-bold text-primary">{n.actorName}</p> : null}
                     <p className="text-sm font-bold leading-6">{n.title}</p>
                     {n.body && <p className="text-xs text-muted-foreground">{n.body}</p>}
                     <p className="mt-0.5 text-xs text-muted-foreground">{when(n.created_at)}</p>
