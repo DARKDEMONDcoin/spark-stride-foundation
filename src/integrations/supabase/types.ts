@@ -2670,6 +2670,7 @@ export type Database = {
       }
       user_notifications: {
         Row: {
+          actor_id: string | null
           body: string
           created_at: string
           id: string
@@ -2680,6 +2681,7 @@ export type Database = {
           workspace_id: string | null
         }
         Insert: {
+          actor_id?: string | null
           body?: string
           created_at?: string
           id?: string
@@ -2690,6 +2692,7 @@ export type Database = {
           workspace_id?: string | null
         }
         Update: {
+          actor_id?: string | null
           body?: string
           created_at?: string
           id?: string
@@ -2700,6 +2703,13 @@ export type Database = {
           workspace_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "user_notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_notifications_workspace_id_fkey"
             columns: ["workspace_id"]

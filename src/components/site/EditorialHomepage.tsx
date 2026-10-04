@@ -70,6 +70,8 @@ const capabilities = [
     body: "يبني خطة ٣٠ يومًا، يكتب كل نسخة، ينسّق التصميم والنشر، ثم يعيد أفضل الأفكار إلى التقويم.",
     image: sonnyDesktop,
     mobileImage: sonnyMobile,
+    video: "/media/home/sonny-desktop.mp4",
+    mobileVideo: "/media/home/sonny-mobile.mp4",
     tone: "terracotta",
     span: "wide",
   },
@@ -80,6 +82,8 @@ const capabilities = [
     body: "تفرز البريد، ترتب الاجتماعات، وتضع القرارات المعلّقة في ملخص صباحي واحد.",
     image: evaDesktop,
     mobileImage: evaMobile,
+    video: "/media/home/eva-desktop.mp4",
+    mobileVideo: "/media/home/eva-mobile.mp4",
     tone: "gold",
     span: "standard",
   },
@@ -90,6 +94,8 @@ const capabilities = [
     body: "يبحث عن العميل المناسب، يخصص التواصل، ويسلمك الفرص الجاهزة للمكالمة.",
     image: samDesktop,
     mobileImage: samMobile,
+    video: "/media/home/sam-desktop.mp4",
+    mobileVideo: "/media/home/sam-mobile.mp4",
     tone: "teal",
     span: "standard",
   },
@@ -100,6 +106,8 @@ const capabilities = [
     body: "ترصد السؤال، تبني خطة موضوعات، وتكتب صفحات أصلية مرتبطة بما يطلبه السوق.",
     image: nourDesktop,
     mobileImage: nourMobile,
+    video: "/media/home/nour-desktop.mp4",
+    mobileVideo: "/media/home/nour-mobile.mp4",
     tone: "terracotta",
     span: "wide",
   },
@@ -110,6 +118,8 @@ const capabilities = [
     body: "تحول المسودة إلى نظام بصري متسق، ثم تجهز نسخ كل منصة للمراجعة.",
     image: danaDesktop,
     mobileImage: danaMobile,
+    video: "/media/home/dana-desktop.mp4",
+    mobileVideo: "/media/home/dana-mobile.mp4",
     tone: "teal",
     span: "standard",
   },
@@ -120,6 +130,8 @@ const capabilities = [
     body: "يجمع أداء القنوات، يرصد التغير، ويحدد أين تتحرك الميزانية والجهد بعد ذلك.",
     image: adamDesktop,
     mobileImage: adamMobile,
+    video: "/media/home/adam-desktop.mp4",
+    mobileVideo: "/media/home/adam-mobile.mp4",
     tone: "gold",
     span: "standard",
   },
@@ -413,11 +425,15 @@ function useDeviceLanding<T extends HTMLElement>() {
 function ProductFrame({
   src,
   mobileSrc,
+  video,
+  mobileVideo,
   alt,
   hero = false,
 }: {
   src: string;
   mobileSrc?: string;
+  video?: string;
+  mobileVideo?: string;
   alt: string;
   hero?: boolean;
 }) {
@@ -433,10 +449,15 @@ function ProductFrame({
         <span className="sahl-phone-button is-volume-down" aria-hidden="true" />
         <span className="sahl-phone-button is-power" aria-hidden="true" />
         <div className="sahl-device-screen">
-          <picture>
-            {mobileSrc && <source media="(max-width: 720px)" srcSet={mobileSrc} />}
-            <img src={src} alt={alt} loading={hero ? "eager" : "lazy"} />
-          </picture>
+          {video ? <video autoPlay muted loop playsInline preload={hero ? "auto" : "metadata"} poster={src} aria-label={alt}>
+            {mobileVideo ? <source media="(max-width: 720px)" src={mobileVideo.replace(/\.mp4$/, ".webm")} type="video/webm" /> : null}
+            {mobileVideo ? <source media="(max-width: 720px)" src={mobileVideo} type="video/mp4" /> : null}
+            <source src={video.replace(/\.mp4$/, ".webm")} type="video/webm" />
+            <source src={video} type="video/mp4" />
+          </video> : <picture>
+              {mobileSrc && <source media="(max-width: 720px)" srcSet={mobileSrc} />}
+              <img src={src} alt={alt} loading={hero ? "eager" : "lazy"} />
+            </picture>}
         </div>
       </div>
       <div className="sahl-laptop-base" aria-hidden="true">
@@ -679,6 +700,8 @@ export function EditorialHomepage() {
             <ProductFrame
               src={sonnyDesktop}
               mobileSrc={sonnyMobile}
+              video="/media/home/sonny-desktop.mp4"
+              mobileVideo="/media/home/sonny-mobile.mp4"
               alt="مساحة عمل سهل: محادثة سِراج داخل المنصة"
               hero
             />
@@ -821,6 +844,8 @@ export function EditorialHomepage() {
                 <ProductFrame
                   src={item.image}
                   mobileSrc={item.mobileImage}
+                  video={item.video}
+                  mobileVideo={item.mobileVideo}
                   alt={`واجهة ${item.kicker} داخل سهل`}
                 />
               </Reveal>

@@ -245,9 +245,7 @@ function CalendarPage() {
         ? allPosts
         : member === "nour"
           ? []
-          : allPosts.filter((p) =>
-              member === "dana" ? p.employee_id === "dana" || Boolean(p.image_url) : p.employee_id !== "dana",
-            ),
+          : allPosts.filter((p) => p.employee_id === member),
     [allPosts, member],
   );
   const byDay = useMemo(() => {
@@ -447,7 +445,7 @@ function CalendarPage() {
       title={lens?.title ?? "تقويم الفريق"}
       lead={lens?.lead ?? "كل ما يُنشر للجمهور، وكل مواعيدك وأعمالك — كلٌّ حسب موظفه"}
       actions={
-        lens?.view === "meetings" ? undefined : <div className="flex flex-wrap items-center gap-2">
+        lens?.view === "meetings" || employee === "nour" ? undefined : <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => learnMutation.mutate()}
             disabled={!workspace || learnMutation.isPending}
@@ -860,7 +858,7 @@ function CalendarPage() {
                   ))}
               </div>
             ) : null}
-            {!isLoading && monthPosts.length === 0 && !Object.keys(articlesByDay).length ? (
+            {!isLoading && monthPosts.length === 0 && !Object.values(articlesByDay).flat().length ? (
               <div className="rounded-xl border border-dashed border-border p-8 text-center">
                 <span className="mx-auto grid size-12 place-items-center rounded-xl bg-secondary">
                   <CalendarDays className="size-6 text-ink-soft" />
@@ -872,15 +870,14 @@ function CalendarPage() {
               </div>
             ) : null}
           </div>
-          {!isLoading && list.length === 0 && articles.length === 0 ? (
+          {!isLoading && list.length === 0 && (member !== "nour" || articles.length === 0) ? (
             <div className="m-4 hidden rounded-xl border border-dashed border-border p-8 text-center md:block">
               <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-secondary">
                 <CalendarDays className="size-6 text-ink-soft" />
               </span>
               <p className="mt-3 font-black">تقويمك فارغ</p>
               <p className="mt-1 text-sm text-ink-soft">
-                اضغط «خطّط لي المحتوى» وسيجهّز سِراج أسبوعاً أو شهراً كاملاً بالنصوص والصور خلال
-                دقائق.
+                {member === "nour" ? "اطلب من نور مقالاً وحدد موعده ليظهر هنا." : member === "dana" ? "اطلب من دانة تصميماً وحدد موعد نشره ليظهر هنا." : "اضغط «خطّط لي المحتوى» وسيجهّز سِراج أسبوعاً أو شهراً كاملاً بالنصوص والصور خلال دقائق."}
               </p>
             </div>
           ) : null}

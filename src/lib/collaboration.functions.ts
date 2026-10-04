@@ -50,7 +50,7 @@ export const changeMemberRole = createServerFn({ method: "POST" }).middleware([r
     // Ownership verified above; members cannot update their own role rows directly.
     const { error } = await supabaseAdmin.from("workspace_members").update({ role: data.role }).eq("workspace_id", data.workspaceId).eq("user_id", data.userId);
     if (error) throw new Error(error.message);
-    await supabaseAdmin.from("user_notifications").insert({ user_id: data.userId, workspace_id: data.workspaceId, kind: "role_changed", title: "تغيّر دورك", body: data.role === "admin" ? "أصبحت مدير مشاريع في المساحة." : "أصبحت عضواً في المساحة." });
+    await supabaseAdmin.from("user_notifications").insert({ user_id: data.userId, workspace_id: data.workspaceId, actor_id: context.userId, kind: "role_changed", title: "تغيّر دورك", body: data.role === "admin" ? "أصبحت مدير مشاريع في المساحة." : "أصبحت عضواً في المساحة." });
     return { ok: true };
   });
 

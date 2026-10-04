@@ -61,9 +61,23 @@ export const listMyInbox = createServerFn({ method: "GET" }).middleware([require
       }
     } catch { /* التذكير اختياري */ }
     const { data: notes } = await context.supabase.from("user_notifications")
-      .select("id, kind, title, body, workspace_id, read_at, created_at")
+      .select("id, kind, title, body, workspace_id, actor_id, read_at, created_at")
       .order("created_at", { ascending: false }).limit(30);
-    return { invites, notifications: notes ?? [] };
+    const actorIds = [...new Set((notes ?? []).map((note) => note.actor_id).filter((id): id is string => Boolean(id)))];
+    const { data: actors } = actorIds.length
+      ? await admin.from("profiles").select("id, full_name, avatar_url").in("id", actorIds)
+      : { data: [] };
+    const { signAvatars } = await import("./avatar-sign.server");
+    const signedActors = await signAvatars(admin, (actors ?? []).map((actor) => actor.avatar_url));
+    const actorMap = new Map((actors ?? []).map((actor) => [actor.id, {
+      name: actor.full_name || "عضو الفريق",
+      avatar: actor.avatar_url ? signedActors.get(actor.avatar_url) ?? null : null,
+    }]));
+    return { invites, notifications: (notes ?? []).map((note) => ({
+      ...note,
+      actorName: note.actor_id ? actorMap.get(note.actor_id)?.name ?? "عضو الفريق" : null,
+      actorAvatar: note.actor_id ? actorMap.get(note.actor_id)?.avatar ?? null : null,
+    })) };
   });
 
 const respondInput = z.object({ invitationId: z.string().uuid(), accept: z.boolean() });
@@ -93,6 +107,7 @@ export const respondToInvite = createServerFn({ method: "POST" }).middleware([re
     await admin.from("user_notifications").insert({
       user_id: invite.invited_by,
       workspace_id: invite.workspace_id,
+      actor_id: context.userId,
       kind: data.accept ? "invite_accepted" : "invite_declined",
       title: data.accept ? `${name} انضم إلى «${space.name}»` : `${name} اعتذر عن دعوة «${space.name}»`,
       body: data.accept ? "أصبح عضواً ويمكنك الآن إسناد المهام له." : "يمكنك إرسال دعوة جديدة لاحقاً إن رغبت.",

@@ -47,12 +47,12 @@ export const Route = createFileRoute("/app/settings")({
       { title: "الإعدادات | سهل" },
       {
         name: "description",
-        content: "إدارة مساحة عمل سهل والحساب والأمان والتنبيهات والتكاملات.",
+        content: "إدارة مساحة عمل سهل والحساب والأمان والتنبيهات والاستخدام.",
       },
       { property: "og:title", content: "الإعدادات | سهل" },
       {
         property: "og:description",
-        content: "إدارة مساحة عمل سهل والحساب والأمان والتنبيهات والتكاملات.",
+        content: "إدارة مساحة عمل سهل والحساب والأمان والتنبيهات والاستخدام.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -626,6 +626,7 @@ function AccountPanel({ profile, onNotice }: { profile: ProfileData; onNotice: N
           </form>
         )}
         <div className="mt-6 flex flex-wrap gap-3 border-t border-border pt-5">
+          <p className="w-full text-xs leading-5 text-muted-foreground">يشمل الملف بيانات ملفك الشخصي ومساحات العمل التي تملكها، ولا يشمل المحادثات أو ملفات الخدمات المرتبطة.</p>
           <Button
             type="button"
             variant="outline"
@@ -644,7 +645,7 @@ function AccountPanel({ profile, onNotice }: { profile: ProfileData; onNotice: N
               anchor.download = "sahl-account-data.json";
               anchor.click();
               URL.revokeObjectURL(url);
-              onNotice({ type: "success", text: "تم تنزيل نسخة من بياناتك." });
+              onNotice({ type: "success", text: "تم تنزيل ملف بيانات الحساب ومساحات العمل." });
             }}
           >
             <Download className="size-4" />
