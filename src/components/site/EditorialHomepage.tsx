@@ -450,7 +450,9 @@ function ProductFrame({
         <span className="sahl-phone-button is-power" aria-hidden="true" />
         <div className="sahl-device-screen">
           {video ? <video autoPlay muted loop playsInline preload={hero ? "auto" : "metadata"} poster={src} aria-label={alt}>
+            {mobileVideo ? <source media="(max-width: 720px)" src={mobileVideo.replace(/\.mp4$/, ".webm")} type="video/webm" /> : null}
             {mobileVideo ? <source media="(max-width: 720px)" src={mobileVideo} type="video/mp4" /> : null}
+            <source src={video.replace(/\.mp4$/, ".webm")} type="video/webm" />
             <source src={video} type="video/mp4" />
           </video> : <picture>
               {mobileSrc && <source media="(max-width: 720px)" srcSet={mobileSrc} />}
