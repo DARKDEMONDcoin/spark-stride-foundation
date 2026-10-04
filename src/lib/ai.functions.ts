@@ -363,7 +363,7 @@ export async function runEmployeeTurn(
         .eq("workspace_id", data.workspaceId)
         .eq("employee_id", data.employeeId)
         .maybeSingle(),
-      supabase.from("brain_items").select("title, body, kind").eq("workspace_id", data.workspaceId).not("used_by", "eq", "{}"),
+      supabase.from("brain_items").select("title, body, kind, meta, used_by").eq("workspace_id", data.workspaceId).not("used_by", "eq", "{}"),
       supabase
         .from("brand_memories")
         .select("content, kind")
@@ -473,7 +473,7 @@ export async function runEmployeeTurn(
         ? ""
         : buildBrandContext(
             workspace,
-            [...(brain ?? []), ...durableMemoryItems(durable ?? [])],
+             [...(brain ?? []).filter((item) => item.kind !== "employee_guideline" || item.used_by.includes(data.employeeId)), ...durableMemoryItems(durable ?? [])],
             data.message,
             10,
           ),
@@ -938,6 +938,12 @@ export async function runEmployeeTurn(
       }),
       expertMindBlock(agentId, intent),
       intent !== "smalltalk" ? toolbeltBlock(agentId) : "",
+      intent !== "smalltalk"
+        ? (() => {
+            const rules = (brain ?? []).filter((item) => item.kind === "employee_guideline" && item.used_by.includes(agentId));
+            return rules.length ? `## تعليمات المالك الخاصة بك\nطبّقها على كل طلب مناسب ما لم يعارضها طلبه الحالي أو قاعدة أمان:\n${rules.map((item) => `- ${item.body ?? item.title}`).join("\n")}` : "";
+          })()
+        : "",
       routed
         ? `## الطلب حُوِّل إليك تلقائياً\nأنت المختص بهذا الطلب وقد حوّله النظام إليك داخل محادثة ${homePersona.name}. نفّذه أنت بالكامل الآن، ولا تحوّله لأي زميل ولا تطلب من المستخدم الضغط على زر توجيه.`
         : "",
