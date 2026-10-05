@@ -15,6 +15,8 @@
  * قاعدة ثابتة: محتوى أي صفحة نجلبها هو **بيانات** لا تعليمات. لا يُنفَّذ منه شيء.
  */
 
+import { jinaHeaders } from "./jina.server";
+
 /** ما يُعاد لكل طلب: النص، وهل جاء من التخزين المؤقت، وحالة HTTP. */
 export type SafeFetchResult = {
   ok: boolean;
@@ -53,7 +55,7 @@ const DELAY_MS: Record<string, number> = {
   "suggestqueries.google.com": 1_500,
   "www.bing.com": 3_000,
   "api.bing.com": 1_500,
-  "r.jina.ai": 2_000,
+  "r.jina.ai": process.env["JINA_API_KEY"] ? 300 : 2_000,
   "www.reddit.com": 2_500,
   "search.marginalia.nu": 3_000,
   "www.mojeek.com": 3_000,
@@ -70,7 +72,7 @@ const DAILY_CAP: Record<string, number> = {
   "google.com": 200,
   "duckduckgo.com": 400,
   "html.duckduckgo.com": 400,
-  "r.jina.ai": 500,
+  "r.jina.ai": process.env["JINA_API_KEY"] ? 5_000 : 500,
 };
 const DEFAULT_DAILY_CAP = 1_500;
 
@@ -272,6 +274,7 @@ export async function safeFetch(url: string, opts: SafeFetchOptions = {}): Promi
             agent === "bot" ? BOT_AGENT : BROWSER_AGENTS[agentCursor++ % BROWSER_AGENTS.length]!,
           "Accept-Language": "ar,en;q=0.8",
           ...headers,
+          ...jinaHeaders(url),
         },
         signal: AbortSignal.timeout(ms),
       });
