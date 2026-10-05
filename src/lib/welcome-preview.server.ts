@@ -1,5 +1,6 @@
 /** Bounded public-site evidence for the introduction. No model calls or account writes. */
 import { parseHTML } from "linkedom";
+import { jinaHeaders } from "./jina.server";
 
 export type WelcomePreview = {
   url: string;
@@ -109,7 +110,7 @@ async function directPage(url: URL, root: string | null) {
  */
 async function renderedPage(url: URL) {
   const res = await fetch(`https://r.jina.ai/${url.toString()}`, {
-    headers: { "X-Return-Format": "html", "X-Timeout": "12", Accept: "text/html" },
+    headers: { "X-Return-Format": "html", "X-Timeout": "12", Accept: "text/html", ...jinaHeaders("https://r.jina.ai/") },
     signal: AbortSignal.timeout(15000),
   });
   if (!res.ok) throw new Error("لم نتمكن من قراءة صفحات هذا الموقع.");

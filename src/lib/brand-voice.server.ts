@@ -10,6 +10,7 @@ import { parseHTML } from "linkedom";
 import { normalizeArabic } from "./memory.server";
 import { blockAwareText, extractArticle } from "./readability.server";
 import { normalizeUrl as normalizePublicUrl } from "./brand-assets.server";
+import { jinaHeaders } from "./jina.server";
 
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36 SahlBot/1.0";
@@ -163,7 +164,7 @@ function fallbackText(html: string): string {
 async function fetchRenderedText(url: string): Promise<string> {
   try {
     const res = await fetch(`https://r.jina.ai/${url}`, {
-      headers: { "User-Agent": UA, Accept: "text/plain" },
+      headers: { "User-Agent": UA, Accept: "text/plain", ...jinaHeaders("https://r.jina.ai/") },
       signal: timeout(20_000),
     });
     if (!res.ok) return "";

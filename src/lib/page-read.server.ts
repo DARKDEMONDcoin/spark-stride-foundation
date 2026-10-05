@@ -90,10 +90,22 @@ export async function readPage(url: string, maxFacts = 6): Promise<PageRead | nu
     skipRobots: true,
     // البوابة ترفض الوكلاء المتنكّرين كمتصفح وتقبل الهوية المعلنة — الصدق هنا أنجح.
     agent: "bot",
+    // بلا صور ولا ضجيج: نص أنظف يدخل في ميزانية السياق.
+    headers: { "X-Retain-Images": "none", "X-Md-Link-Style": "discarded" },
     ms: 15_000,
     maxChars: 120_000,
   });
-  if (!res.ok || res.text.length < 200) return null;
+  if (!res.ok || res.text.length < 200) {
+    // القارئ غير متاح (حد/دائرة مفتوحة): نقرأ الصفحة مباشرة بدل الاستسلام.
+    try {
+      const { fetchPageText } = await import("./knowledge.server");
+      const direct = await fetchPageText(url);
+      if (direct.text.length < 200) return null;
+      return { url, title: direct.title, text: direct.text.slice(0, 20_000), facts: [] };
+    } catch {
+      return null;
+    }
+  }
 
   const title = TITLE_LINE.exec(res.text)?.[1]?.trim() ?? url;
   const body = res.text.replace(/^(Title|URL Source|Published Time|Markdown Content):.*$/gm, "");
@@ -111,7 +123,14 @@ export async function readPage(url: string, maxFacts = 6): Promise<PageRead | nu
     if (facts.length >= maxFacts) break;
   }
 
-  return { url, title, text: body.slice(0, 20_000), facts };
+  const clean = body
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/_(search|code|play_arrow|attach_money|arrow\\?_drop\\?_down|login)_/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return { url, title, text: clean.slice(0, 20_000), facts };
 }
 
 /**
