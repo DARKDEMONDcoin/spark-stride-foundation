@@ -15,7 +15,7 @@ export function EmployeeTopbar({
   active,
 }: {
   memberId: string;
-  active: "chat" | "calendar";
+  active: "chat" | "calendar" | "guidelines";
 }) {
   const member = getMember(memberId);
   const navigate = useNavigate();
@@ -28,6 +28,8 @@ export function EmployeeTopbar({
       to: "/app/calendar",
       search: { employee: member.id as "sonny" },
     });
+  const goGuidelines = () =>
+    void navigate({ to: "/app/guidelines/$id", params: { id: member.id } });
 
   return (
     <div
@@ -72,10 +74,10 @@ export function EmployeeTopbar({
           type="button"
           variant="ghost"
           size="sm"
-          className="chat-nav-button"
+          className={cn("chat-nav-button", active === "guidelines" && "is-active")}
           aria-label="التعليمات"
           title="التعليمات وعقل العلامة"
-          onClick={() => void navigate({ to: "/app/brain" })}
+          onClick={goGuidelines}
         >
           <BookOpenText className="size-4" />
           <span>التعليمات</span>
