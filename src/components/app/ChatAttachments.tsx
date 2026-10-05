@@ -320,7 +320,7 @@ export function ChatAttachments({
                 >
                   <ChevronRight className="size-5" />
                 </Button>
-                <span className="fixed bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-background/90 px-3 py-1 text-xs font-bold text-foreground">
+                <span dir="ltr" className="fixed bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-background/90 px-3 py-1 text-xs font-bold text-foreground">
                   {(open ?? 0) + 1} / {media.length}
                 </span>
               </>
