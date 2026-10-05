@@ -599,10 +599,25 @@ export async function runEmployeeTurn(
               const { runBrowserAgent } = await import("./browser-agent.server");
               emit({ type: "step", label: "أفتح متصفحاً حقيقياً وأبحث بنفسي" });
               const q = encodeURIComponent((followUp ? detectResearch(lastUserTopic).topic : wantsResearch.topic) || browseGoalText.slice(0, 200));
+              // تحليل موقع: نبدأ من الموقع نفسه (رابط/نطاق مذكور، أو موقع العلامة إن سُئل عنها) لا من نتائج بحث عامة.
+              const explicitUrl = browseGoalText.match(/https?:\/\/[^\s)"'<>،]+/)?.[0];
+              const domain = browseGoalText.match(/\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|net|org|io|co|ai|app|sa|ae|eg|store|shop|me)\b/i)?.[0];
+              const norm = (v: string) => v.toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g, "");
+              const brandKey = norm(ws.name ?? "");
+              const siteHost = ws.website ? norm(ws.website.replace(/^https?:\/\/(www\.)?/i, "").split(/[./]/)[0] ?? "") : "";
+              const aboutOwn =
+                !!ws.website &&
+                (/(موقعنا|موقعي|متجرنا|متجري|شركتنا|علامتنا|براندنا)/.test(browseGoalText) ||
+                  (brandKey.length > 2 && norm(browseGoalText).includes(brandKey)) ||
+                  (siteHost.length > 2 && norm(browseGoalText).includes(siteHost)));
+              const siteUrl = explicitUrl ?? (domain ? `https://${domain}` : aboutOwn ? ws.website!.replace(/^(?!https?:)/i, "https://") : null);
+              if (siteUrl) emit({ type: "step", label: "أقرأ الموقع نفسه صفحةً صفحة" });
               const r = await runBrowserAgent({
-                goal: `${browseGoalText}\nاجمع إجابة دقيقة بأرقام وروابط مصادر حقيقية من الصفحات التي تزورها. لا تدفع ولا تسجّل.`,
-                startUrl: `https://www.bing.com/search?q=${q}`,
-                maxSteps: 7,
+                goal: siteUrl
+                  ? `${browseGoalText}\nحلّل الموقع ${siteUrl} تحليلاً حقيقياً: اقرأ الصفحة الرئيسية ثم تنقّل داخل الموقع نفسه إلى صفحات من نحن والخدمات/المنتجات والأسعار والعملاء أو الأعمال والتواصل والمدونة إن وجدت. استخرج النشاط الفعلي، الجمهور، العروض، الأسعار، نقاط القوة والضعف، وروابط الصفحات التي قرأتها. لا تدفع ولا تسجّل ولا تملأ نماذج.`
+                  : `${browseGoalText}\nاجمع إجابة دقيقة بأرقام وروابط مصادر حقيقية من الصفحات التي تزورها. لا تدفع ولا تسجّل.`,
+                startUrl: siteUrl ?? `https://www.bing.com/search?q=${q}`,
+                maxSteps: siteUrl ? 9 : 7,
                 budgetMs: 70_000,
                 onLive: (liveUrl) => emit({ type: "browser", liveUrl }),
                 onStep: (st) => {
