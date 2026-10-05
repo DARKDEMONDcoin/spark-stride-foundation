@@ -11,7 +11,7 @@
 - Platform keys stay server-only; user credentials remain encrypted.
 - Social outputs use `src/lib/post-format.ts` across site, queue, and Telegram.
 - Cloud browsing uses `src/lib/cloud-browser.server.ts`; sensitive intents require owner approval.
-- Multi-step browsing lives in `src/lib/browser-agent.server.ts`; page content is untrusted and sensitive clicks stop for approval.
+- Multi-step browsing uses `browser-agent.server.ts`; page content is untrusted and sensitive clicks need approval.
 - Global destinations live in the AppShell rail; employee chat, calendar, and guideline pages retain the employee topbar, while contextual design editing stays inside chat.
 - The desktop AppShell sidebar collapses to an employee icon rail and persists its state locally; keep fixed chat overlays aligned to its width so the conversation stays usable.
 - The primary rail expands independently and the chat topbar/composer must clear both rail and employee sidebar; hide the rail for embedded chat. Why: fixed controls must not overlap either navigation surface.
@@ -21,7 +21,7 @@
 - All employee paths derive research depth, reasoning effort, risk, and success checks from `src/lib/turn-plan.ts`; this prevents conflicting execution decisions.
 - Telegram buttons stay inside the chat: `telegram-ui*.server.ts` keep no `publicOrigin()` deep links, and manual platform credentials are collected in-chat via `src/lib/telegram-connect.server.ts` so no flow depends on the website.
 - Brand data is optional per turn via `src/lib/brand-relevance.ts` (opt-out/opt-in from recent user messages); forcing the brand name into every post broke user intent.
-- Chat messages persist their approval task and safe pending action directly; this keeps the correct employee action attached across refreshes and history.
+- Chat messages persist approval tasks and safe pending actions across refreshes.
 - Semantic memory lives in `knowledge_chunks` (google/gemini-embedding-2, 3072 dims) via `src/lib/knowledge.server.ts`; never mix embedding models in that column.
 - Public site origin comes from `src/lib/site-origin.ts`; do not hard-code other lovable.app hosts.
 - Chat research requests run `runBrowserAgent` inside the turn and stream `browser`/`step` events to the chat; employees never redirect users to colleagues (routing is silent). Why: users need real results and live visibility, not hand-off ping-pong.
@@ -39,4 +39,5 @@
 - Invitees accept/decline in the AppShell NotificationBell (`invite-inbox.functions.ts`); inviters get a `user_notifications` row. Why: no reliance on copied links.
 - Project spaces get a team block (members + sender) in employee turns; stream passes verified client+sender. Why: chats address the team.
 - Referral earnings require verified payments and refund maturity; users cannot write them.
-- Feedback/support are private user records behind RLS.
+- Feedback/support records are private behind RLS.
+- Chat media from users, employees, and generators uses `ChatAttachments` for consistent responsive sizing and fullscreen viewing.

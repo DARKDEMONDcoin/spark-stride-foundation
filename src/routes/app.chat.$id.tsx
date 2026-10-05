@@ -58,7 +58,7 @@ import { saveChatSignal } from "@/lib/learning.functions";
 import { Thinking, LiveStatus } from "@/components/app/Thinking";
 import { VoiceInput } from "@/components/app/VoiceInput";
 import { Markdown } from "@/components/app/Markdown";
-import { ChatAttachments, splitUserBody } from "@/components/app/ChatAttachments";
+import { ChatAttachments, splitMessageMedia, splitUserBody } from "@/components/app/ChatAttachments";
 import { PostCards } from "@/components/app/PostCards";
 import { OutputActions } from "@/components/app/OutputActions";
 import { requestedPublishTargets } from "@/lib/platforms";
@@ -1343,6 +1343,7 @@ function ChatView({
               const isUser = m.role === "user";
               const body = isUser ? m.body : prettyBody(m.body);
               const parsedUser = isUser ? splitUserBody(m.body) : null;
+               const parsedAssistant = !isUser ? splitMessageMedia(body) : null;
               const sender = isUser && m.sender_id ? humanTeam?.members.find((person) => person.userId === m.sender_id) : null;
               const priorRequest = messageRequests[idx] ?? "";
               return (
@@ -1395,6 +1396,7 @@ function ChatView({
                         {parsedUser?.items.length ? (
                           <ChatAttachments items={parsedUser.items} className="mb-2" />
                         ) : null}
+                         {parsedAssistant?.items.length ? <ChatAttachments items={parsedAssistant.items} className="mb-2" /> : null}
                         <MessageContent
                         className={cn(
                            "chat-message-content min-w-0 px-3 py-2 text-[0.82rem] leading-6",
@@ -1415,7 +1417,7 @@ function ChatView({
 
                         ) : (
                           <>
-                            <Markdown body={body} onOpenApp={openAppInChat} />
+                             <Markdown body={parsedAssistant?.text ?? body} onOpenApp={openAppInChat} />
                           </>
                         )}
                         {!isUser &&
