@@ -1,6 +1,4 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { BookOpenText } from "lucide-react";
-
 import { AppShell } from "@/components/app/AppShell";
 import { EmployeeGuidelines } from "@/components/app/EmployeeGuidelines";
 import { EmployeeTopbar } from "@/components/app/EmployeeTopbar";
@@ -37,14 +35,7 @@ function EmployeeGuidelinesPage() {
     <AppShell title={`تعليمات ${member.name}`} lead={`التفضيلات المتخصصة التي يطبقها ${member.name} تلقائياً في كل طلب مناسب.`}>
       <EmployeeTopbar memberId={member.id} active="guidelines" />
       <main className="mx-auto w-full max-w-3xl" dir="rtl">
-        <section className="rounded-lg border border-border bg-card p-4 shadow-card sm:p-6">
-          <header className="mb-5 flex items-start gap-3 border-b border-border pb-5">
-            <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-secondary text-primary"><BookOpenText className="size-5" /></span>
-            <div className="min-w-0">
-              <h1 className="font-display text-lg font-black">تعليمات {member.name}</h1>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">اكتب تفضيلاتك مرة واحدة، وسيطبقها تلقائياً في كل طلب مناسب.</p>
-            </div>
-          </header>
+        <section className="border-t border-border pt-5">
           <EmployeeGuidelines {...(workspace?.id ? { workspaceId: workspace.id } : {})} employeeId={member.id} employeeName={member.name} />
         </section>
       </main>
