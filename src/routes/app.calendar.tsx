@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 
 import { AppShell } from "@/components/app/AppShell";
+import { EmployeeTopbar } from "@/components/app/EmployeeTopbar";
 import { PlatformPreviewDialog } from "@/components/app/PlatformPreview";
 import { AppIcon, appLabel } from "@/components/site/AppIcon";
 import { Portrait } from "@/components/site/Portrait";
@@ -469,6 +470,7 @@ function CalendarPage() {
         </div>
       }
     >
+      {employee ? <EmployeeTopbar memberId={employee} active="calendar" /> : null}
       {error ? (
         <div className="mb-4 flex items-start justify-between gap-3 rounded-2xl bg-destructive/10 p-4 text-sm font-bold text-destructive">
           <span>
