@@ -83,6 +83,7 @@ import { Route as ApiPublicTelegramNotifyRouteImport } from './routes/api/public
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as AppChatIndexRouteImport } from './routes/app.chat.index'
 import { Route as AppChatIdRouteImport } from './routes/app.chat.$id'
+import { Route as AppGuidelinesIdRouteImport } from './routes/app.guidelines.$id'
 import { Route as ApiPublicMetaCallbackRouteImport } from './routes/api/public/meta.callback'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram.webhook'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp.webhook'
@@ -461,6 +462,11 @@ const AppChatIdRoute = AppChatIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AppChatRoute,
 } as any)
+const AppGuidelinesIdRoute = AppGuidelinesIdRouteImport.update({
+  id: '/guidelines/$id',
+  path: '/guidelines/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 const ApiPublicMetaCallbackRoute = ApiPublicMetaCallbackRouteImport.update({
   id: '/api/public/meta/callback',
   path: '/api/public/meta/callback',
@@ -553,6 +559,7 @@ export interface FileRoutesByFullPath {
   '/api/public/telegram-notify': typeof ApiPublicTelegramNotifyRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/app/chat/$id': typeof AppChatIdRoute
+  '/app/guidelines/$id': typeof AppGuidelinesIdRoute
   '/app/chat/': typeof AppChatIndexRoute
   '/api/public/meta/callback': typeof ApiPublicMetaCallbackRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -630,6 +637,7 @@ export interface FileRoutesByTo {
   '/api/public/telegram-notify': typeof ApiPublicTelegramNotifyRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/app/chat/$id': typeof AppChatIdRoute
+  '/app/guidelines/$id': typeof AppGuidelinesIdRoute
   '/app/chat': typeof AppChatIndexRoute
   '/api/public/meta/callback': typeof ApiPublicMetaCallbackRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -710,6 +718,7 @@ export interface FileRoutesById {
   '/api/public/telegram-notify': typeof ApiPublicTelegramNotifyRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/app/chat/$id': typeof AppChatIdRoute
+  '/app/guidelines/$id': typeof AppGuidelinesIdRoute
   '/app/chat/': typeof AppChatIndexRoute
   '/api/public/meta/callback': typeof ApiPublicMetaCallbackRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -791,6 +800,7 @@ export interface FileRouteTypes {
     | '/api/public/telegram-notify'
     | '/api/public/track'
     | '/app/chat/$id'
+    | '/app/guidelines/$id'
     | '/app/chat/'
     | '/api/public/meta/callback'
     | '/api/public/telegram/webhook'
@@ -868,6 +878,7 @@ export interface FileRouteTypes {
     | '/api/public/telegram-notify'
     | '/api/public/track'
     | '/app/chat/$id'
+    | '/app/guidelines/$id'
     | '/app/chat'
     | '/api/public/meta/callback'
     | '/api/public/telegram/webhook'
@@ -947,6 +958,7 @@ export interface FileRouteTypes {
     | '/api/public/telegram-notify'
     | '/api/public/track'
     | '/app/chat/$id'
+    | '/app/guidelines/$id'
     | '/app/chat/'
     | '/api/public/meta/callback'
     | '/api/public/telegram/webhook'
@@ -1526,6 +1538,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppChatIdRouteImport
       parentRoute: typeof AppChatRoute
     }
+    '/app/guidelines/$id': {
+      id: '/app/guidelines/$id'
+      path: '/guidelines/$id'
+      fullPath: '/app/guidelines/$id'
+      preLoaderRoute: typeof AppGuidelinesIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/api/public/meta/callback': {
       id: '/api/public/meta/callback'
       path: '/api/public/meta/callback'
@@ -1589,6 +1608,7 @@ interface AppRouteChildren {
   AppTrustRoute: typeof AppTrustRoute
   AppWorkspaceRoute: typeof AppWorkspaceRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppGuidelinesIdRoute: typeof AppGuidelinesIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -1617,6 +1637,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppTrustRoute: AppTrustRoute,
   AppWorkspaceRoute: AppWorkspaceRoute,
   AppIndexRoute: AppIndexRoute,
+  AppGuidelinesIdRoute: AppGuidelinesIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
