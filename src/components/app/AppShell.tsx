@@ -39,7 +39,7 @@ function ReferralClaimer() {
   return null;
 }
 
-function WorkspaceCard() {
+export function WorkspaceCard() {
   const { data: workspace } = useWorkspace();
   const updateWorkspace = useUpdateWorkspace();
   const website = (workspace as { website?: string | null } | undefined)?.website?.trim();
@@ -114,7 +114,6 @@ function SidebarBody({ onNavigate, collapsed = false, onToggle }: { onNavigate?:
       </div>
 
       <SpaceSwitcher collapsed={collapsed} />
-      {collapsed ? null : <WorkspaceCard />}
 
       <div className={cn("flex min-h-0 flex-1 flex-col", collapsed && "w-full")}>
         <div className={cn("mb-2 px-2", collapsed && "sr-only")}>

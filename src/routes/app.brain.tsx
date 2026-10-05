@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ScrollText, Trash2, Pencil, X, Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 
-import { AppShell } from "@/components/app/AppShell";
+import { AppShell, WorkspaceCard } from "@/components/app/AppShell";
 import { BrandVoiceExtractor } from "@/components/app/BrandVoiceExtractor";
 import { KnowledgeLibrary } from "@/components/app/KnowledgeLibrary";
 import { BusinessProfileCard } from "@/components/app/BusinessProfileCard";
@@ -41,6 +41,7 @@ function BrainPage() {
   return (
     <AppShell title="عقل العلامة" lead="اختياري — شغّل ما تريد أن يلتزم به فريقك، وأوقف ما لا تريده.">
       <div className="mx-auto grid w-full min-w-0 max-w-3xl grid-cols-[minmax(0,1fr)] gap-4 sm:gap-5">
+        <WorkspaceCard />
         {ws ? (
           <BusinessProfileCard workspaceId={ws.id} website={ws.website} profile={ws.profile as never} compact />
         ) : null}
