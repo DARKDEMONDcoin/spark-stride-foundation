@@ -95,7 +95,17 @@ export async function readPage(url: string, maxFacts = 6): Promise<PageRead | nu
     ms: 15_000,
     maxChars: 120_000,
   });
-  if (!res.ok || res.text.length < 200) return null;
+  if (!res.ok || res.text.length < 200) {
+    // القارئ غير متاح (حد/دائرة مفتوحة): نقرأ الصفحة مباشرة بدل الاستسلام.
+    try {
+      const { fetchPageText } = await import("./knowledge.server");
+      const direct = await fetchPageText(url);
+      if (direct.text.length < 200) return null;
+      return { url, title: direct.title, text: direct.text.slice(0, 20_000), facts: [] };
+    } catch {
+      return null;
+    }
+  }
 
   const title = TITLE_LINE.exec(res.text)?.[1]?.trim() ?? url;
   const body = res.text.replace(/^(Title|URL Source|Published Time|Markdown Content):.*$/gm, "");
