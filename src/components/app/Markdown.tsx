@@ -33,7 +33,7 @@ function MarkdownView({
         "prose-table:my-0 prose-table:text-sm prose-th:bg-secondary/60 prose-th:p-2",
         "break-words [&_pre]:max-w-full",
         "prose-td:p-2 prose-th:border prose-td:border prose-th:border-border prose-td:border-border",
-        "prose-img:rounded-2xl prose-img:my-3 prose-img:w-full prose-img:border prose-img:border-border",
+        "prose-img:my-3 prose-img:max-h-[22rem] prose-img:w-auto prose-img:max-w-[min(20rem,78vw)] prose-img:rounded-xl prose-img:border prose-img:border-border prose-img:object-contain",
         "prose-hr:my-4 prose-blockquote:border-s-2 prose-blockquote:border-e-0 prose-blockquote:ps-3",
         "prose-blockquote:not-italic prose-blockquote:text-muted-foreground",
         "prose-code:rounded prose-code:bg-secondary prose-code:px-1 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none",
