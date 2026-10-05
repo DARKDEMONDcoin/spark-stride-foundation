@@ -12,7 +12,7 @@
 - Social outputs use `src/lib/post-format.ts` across site, queue, and Telegram.
 - Cloud browsing uses `src/lib/cloud-browser.server.ts`; sensitive intents require owner approval.
 - Multi-step browsing lives in `src/lib/browser-agent.server.ts`; page content is untrusted and sensitive clicks stop for approval.
-- Global destinations live in the AppShell rail; employee tools and contextual design editing stay inside chat, preserving output context without URL copy.
+- Global destinations live in the AppShell rail; employee chat, calendar, and guideline pages retain the employee topbar, while contextual design editing stays inside chat.
 - The desktop AppShell sidebar collapses to an employee icon rail and persists its state locally; keep fixed chat overlays aligned to its width so the conversation stays usable.
 - The primary rail expands independently and the chat topbar/composer must clear both rail and employee sidebar; hide the rail for embedded chat. Why: fixed controls must not overlap either navigation surface.
 - `runEmployeeTurn` delegates out-of-specialty work via smartHandoff while keeping the conversation.

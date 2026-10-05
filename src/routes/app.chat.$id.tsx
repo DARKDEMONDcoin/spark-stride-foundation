@@ -70,7 +70,6 @@ import { ActionPanel } from "@/components/app/ActionPanel";
 import { ActionCard, type PendingAction } from "@/components/app/ActionCard";
 import { UserAvatar } from "@/components/app/UserAvatar";
 import { PersonAvatar } from "@/components/app/PersonAvatar";
-import { EmployeeGuidelines } from "@/components/app/EmployeeGuidelines";
 import { Portrait } from "@/components/site/Portrait";
 import { streamEmployeeTurn, type BrowserEvent } from "@/lib/employee-stream";
 import { supabase } from "@/integrations/supabase/client";
@@ -767,11 +766,11 @@ function ChatView({
   }, [conversationId, messages?.length]);
 
   /** لوحات الشريط العلوي — تُفتح كلها داخل نفس الصفحة. */
-  const [barPanel, setBarPanel] = useState<"apps" | "brand" | "work" | null>(null);
+  const [barPanel, setBarPanel] = useState<"apps" | "work" | null>(null);
   const [barPanelAnchor, setBarPanelAnchor] = useState({ x: 0, top: 0 });
   const barPanelButtonRefs = useRef<
-    Record<"apps" | "brand" | "work", HTMLButtonElement | null>
-  >({ apps: null, brand: null, work: null });
+    Record<"apps" | "work", HTMLButtonElement | null>
+  >({ apps: null, work: null });
   const [embeddedTool, setEmbeddedTool] = useState<{
     tool: WorkTool;
     mode: "inline" | "expanded";
@@ -823,14 +822,14 @@ function ChatView({
   const [toolOffset, setToolOffset] = useState({ x: 0, y: 0 });
   const dragRef = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
 
-  const positionBarPanel = (panel: "apps" | "brand" | "work") => {
+  const positionBarPanel = (panel: "apps" | "work") => {
     const button = barPanelButtonRefs.current[panel];
     if (!button) return;
     const rect = button.getBoundingClientRect();
     setBarPanelAnchor({ x: rect.left + rect.width / 2, top: rect.bottom + 8 });
   };
 
-  const toggleBarPanel = (panel: "apps" | "brand" | "work") => {
+  const toggleBarPanel = (panel: "apps" | "work") => {
     if (barPanel === panel) {
       setBarPanel(null);
       return;
@@ -1272,7 +1271,7 @@ function ChatView({
             <Button type="button" variant="ghost" size="sm" className="chat-nav-button" aria-label="التقويم" title="التقويم" onClick={() => void navigate({ to: "/app/calendar", search: { employee: member.id as "sonny" } })}>
               <CalendarDays className="size-4" /><span>التقويم</span>
             </Button>
-            <Button ref={(button) => { barPanelButtonRefs.current.brand = button; }} type="button" variant="ghost" size="sm" className={cn("chat-nav-button", barPanel === "brand" && "is-active")} aria-label="التعليمات" title="التعليمات وعقل العلامة" aria-expanded={barPanel === "brand"} onClick={() => toggleBarPanel("brand")}>
+            <Button type="button" variant="ghost" size="sm" className="chat-nav-button" aria-label="التعليمات" title="تعليمات الموظف" onClick={() => void navigate({ to: "/app/guidelines/$id", params: { id: member.id } })}>
               <BookOpenText className="size-4" /><span>التعليمات</span>
             </Button>
             <Button ref={(button) => { barPanelButtonRefs.current.apps = button; }} type="button" variant="ghost" size="sm" className={cn("chat-nav-button", barPanel === "apps" && "is-active")} aria-label="التكاملات" title="تكاملات الموظف" aria-expanded={barPanel === "apps"} onClick={() => toggleBarPanel("apps")}>
@@ -1969,35 +1968,21 @@ function ChatView({
                 } as React.CSSProperties
               }
               aria-label={
-                barPanel === "apps"
-                  ? `تكاملات ${member.name}`
-                  : barPanel === "brand"
-                        ? `تعليمات ${member.name}`
-                    : `تشغيل ومتابعة ${member.name}`
+                barPanel === "apps" ? `تكاملات ${member.name}` : `تشغيل ومتابعة ${member.name}`
               }
             >
               <div className="topbar-sheet-head">
                 {barPanel === "apps" ? (
                   <PlugZap className="size-4 text-primary" />
-                ) : barPanel === "work" ? (
-                  <Bot className="size-4 text-primary" />
                 ) : (
-                    <BookOpenText className="size-4 text-primary" />
+                  <Bot className="size-4 text-primary" />
                 )}
                 <div>
                   <p>
-                    {barPanel === "apps"
-                      ? `تكاملات ${member.name}`
-                      : barPanel === "brand"
-                        ? `تعليمات ${member.name}`
-                       : `تشغيل ومتابعة ${member.name}`}
+                    {barPanel === "apps" ? `تكاملات ${member.name}` : `تشغيل ومتابعة ${member.name}`}
                   </p>
                   <span>
-                    {barPanel === "apps"
-                      ? "اربط الحسابات التي يحتاجها من هنا مباشرة"
-                      : barPanel === "brand"
-                        ? "تفضيلات تخصصه التي يطبقها تلقائياً"
-                         : "كل ما يستطيع تنفيذه ومتابعته"}
+                    {barPanel === "apps" ? "اربط الحسابات التي يحتاجها من هنا مباشرة" : "كل ما يستطيع تنفيذه ومتابعته"}
                   </span>
                 </div>
                 <button type="button" onClick={() => setBarPanel(null)} aria-label="إغلاق">
@@ -2030,8 +2015,6 @@ function ChatView({
                     );
                   })}
                 </div>
-              ) : barPanel === "brand" ? (
-                <EmployeeGuidelines {...(workspace?.id ? { workspaceId: workspace.id } : {})} employeeId={id} employeeName={member.name} />
               ) : (
                 <div className="chat-work-sheet">
                   <div className="chat-work-links" aria-label="أدوات التشغيل الأساسية">
